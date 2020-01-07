@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "minha-cc-stg",
+    "default": "minha-cc"
+  }
+}
