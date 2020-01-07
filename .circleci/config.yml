@@ -72,14 +72,14 @@ workflows:
             tags:
               only: /.*/
       - build-and-deploy-to-staging:
-          context: minha-cc-stg
+          context: minha-cc-staging
           requires:
             - install-dependencies
           filters:
             branches:
               only: develop
       - build-and-deploy-to-production:
-          context: minha-cc
+          context: minha-cc-production
           requires:
             - install-dependencies
           filters:
