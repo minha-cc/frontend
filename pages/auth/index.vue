@@ -1,0 +1,108 @@
+<template>
+  <v-app id="auth">
+    <v-content>
+      <v-container>
+        <v-row align="center" justify="center">
+          <v-col cols="12" sm="8" md="6">
+            <v-layout justify-center>
+              <v-img
+                src="minha-cc-logo.png"
+                aspect-ratio="1"
+                max-width="238"
+                max-height="87"
+              />
+            </v-layout>
+            <v-card outlined>
+              <v-form @submit.prevent="signIn">
+                <v-card-text>
+                  <v-text-field
+                    v-model="form.email"
+                    :error-messages="emailErrors"
+                    label="Seu email"
+                    name="email"
+                    placeholder="Email"
+                    prepend-icon="mdi-account"
+                    type="email"
+                    autofocus
+                  />
+                  <v-text-field
+                    v-model="form.password"
+                    :error-messages="passwordErrors"
+                    class="mt-4"
+                    label="Sua senha"
+                    name="password"
+                    placeholder="Sua senha com pelo menos 6 caracteres"
+                    prepend-icon="mdi-lock"
+                    type="password"
+                  />
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn :loading="loading" type="submit" color="primary">
+                    Entrar
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-content>
+  </v-app>
+</template>
+
+<script>
+import { required, email, minLength } from 'vuelidate/lib/validators'
+import { firebaseAuth } from '@/plugins/firebase'
+
+export default {
+  data() {
+    return {
+      loading: false,
+      form: {
+        email: '',
+        password: ''
+      }
+    }
+  },
+  validations: {
+    form: {
+      email: { required, email },
+      password: { required, minLength: minLength(6) }
+    }
+  },
+  computed: {
+    emailErrors() {
+      const errors = []
+      if (!this.$v.form.email.$dirty) return errors
+      !this.$v.form.email.required && errors.push('Email é obrigatório.')
+      !this.$v.form.email.email && errors.push('Email deve ser válido')
+      return errors
+    },
+    passwordErrors() {
+      const errors = []
+      if (!this.$v.form.password.$dirty) return errors
+      !this.$v.form.password.required && errors.push('Senha é obrigatório.')
+      !this.$v.form.password.minLength &&
+        errors.push('Senha deve ter pelo menos 6 caracteres')
+      return errors
+    }
+  },
+  methods: {
+    async signIn() {
+      this.$v.$touch()
+      if (this.$v.$invalid) return
+
+      this.loading = true
+
+      try {
+        await firebaseAuth.signInWithEmailAndPassword(
+          this.form.email,
+          this.form.password
+        )
+      } catch (error) {}
+      this.loading = false
+    }
+  }
+}
+</script>
