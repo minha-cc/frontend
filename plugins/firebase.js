@@ -2,9 +2,9 @@ import * as firebase from 'firebase/app'
 import 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  authDomain: `${process.env.FIREBASE_PROJECT_ID}.firebaseapp.com`
+  apiKey: process.env.vue.firebase_api_key,
+  projectId: process.env.vue.firebase_project_id,
+  authDomain: `${process.env.vue.firebase_project_id}.firebaseapp.com`
 }
 
 firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig)
