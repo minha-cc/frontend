@@ -6,7 +6,7 @@
           <v-col cols="12" sm="8" md="6">
             <v-layout justify-center>
               <v-img
-                src="minha-cc-logo.png"
+                :src="require('~/assets/images/minha-cc-logo.png')"
                 aspect-ratio="1"
                 max-width="238"
                 max-height="87"
