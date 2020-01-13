@@ -2,11 +2,11 @@ import * as firebase from 'firebase/app'
 import 'firebase/auth'
 
 console.log('----')
-console.log(process.env.FIREBASE_CONFIG.APIKEY)
+console.log(process.env.APIKEY)
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_CONFIG.APIKEY,
-  projectId: process.env.FIREBASE_CONFIG.PROJECTID,
-  authDomain: `${process.env.FIREBASE_CONFIG.PROJECTID}.firebaseapp.com`
+  apiKey: process.env.APIKEY,
+  authDomain: process.env.AUTHDOMAIN,
+  projectId: process.env.PROJECT_ID
 }
 
 firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig)
