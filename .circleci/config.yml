@@ -43,6 +43,9 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: dotenv workaround
+          command: touch .env
+      - run:
           name: Build Nuxt App
           command: yarn run build
       - run:
@@ -56,6 +59,9 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - run:
+          name: dotenv workaround
+          command: touch .env
       - run:
           name: Build Nuxt App
           command: yarn run build
