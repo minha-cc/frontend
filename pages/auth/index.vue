@@ -12,6 +12,17 @@
                 max-height="87"
               />
             </v-layout>
+            <v-alert
+              v-model="hasError"
+              transition="fade-transition"
+              text
+              outlined
+              color="error"
+              border="left"
+              dismissible
+            >
+              Usuário ou senha inválidos.
+            </v-alert>
             <v-card outlined>
               <v-form @submit.prevent="signIn">
                 <v-card-text>
@@ -59,6 +70,7 @@ export default {
   data() {
     return {
       loading: false,
+      hasError: false,
       form: {
         email: '',
         password: ''
@@ -100,7 +112,9 @@ export default {
           this.form.email,
           this.form.password
         )
-      } catch (error) {}
+      } catch (error) {
+        this.hasError = true
+      }
       this.loading = false
     }
   }
