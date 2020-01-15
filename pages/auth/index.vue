@@ -24,7 +24,7 @@
               Usuário ou senha inválidos.
             </v-alert>
             <v-card outlined>
-              <v-form @submit.prevent="signIn">
+              <v-form @submit.prevent="onSignIn">
                 <v-card-text>
                   <v-text-field
                     v-model="form.email"
@@ -64,7 +64,7 @@
 
 <script>
 import { required, email, minLength } from 'vuelidate/lib/validators'
-import { firebaseAuth } from '@/plugins/firebase'
+import { mapActions } from 'vuex'
 
 export default {
   data() {
@@ -101,17 +101,20 @@ export default {
     }
   },
   methods: {
-    async signIn() {
+    ...mapActions({
+      signIn: 'currentUser/signInAsync'
+    }),
+    async onSignIn() {
       this.$v.$touch()
       if (this.$v.$invalid) return
 
       this.loading = true
 
       try {
-        await firebaseAuth.signInWithEmailAndPassword(
-          this.form.email,
-          this.form.password
-        )
+        await this.signIn({
+          email: this.form.email,
+          password: this.form.password
+        })
       } catch (error) {
         this.hasError = true
       }
