@@ -64,7 +64,7 @@
 
 <script>
 import { required, email, minLength } from 'vuelidate/lib/validators'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   data() {
@@ -98,11 +98,19 @@ export default {
       !this.$v.form.password.minLength &&
         errors.push('Senha deve ter pelo menos 6 caracteres')
       return errors
+    },
+    ...mapGetters({ currentUser: 'auth/getCurrentUser' })
+  },
+  watch: {
+    currentUser(value) {
+      if (value) {
+        this.$router.push('/')
+      }
     }
   },
   methods: {
     ...mapActions({
-      signIn: 'currentUser/signInAsync'
+      signIn: 'auth/signInAsync'
     }),
     async onSignIn() {
       this.$v.$touch()
@@ -115,6 +123,8 @@ export default {
           email: this.form.email,
           password: this.form.password
         })
+
+        this.$router.push('/')
       } catch (error) {
         this.hasError = true
       }
