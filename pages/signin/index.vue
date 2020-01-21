@@ -24,7 +24,15 @@
               Usuário ou senha inválidos.
             </v-alert>
             <v-card outlined>
-              <v-form @submit.prevent="onSignIn">
+              <v-tabs centered>
+                <v-tab>
+                  Entrar
+                </v-tab>
+                <v-tab>
+                  Cadastrar
+                </v-tab>
+              </v-tabs>
+              <v-form @submit.prevent="onSignIn" class="mt-8">
                 <v-card-text>
                   <v-text-field
                     v-model="form.email"
@@ -38,13 +46,15 @@
                   />
                   <v-text-field
                     v-model="form.password"
+                    @click:append="showPassword = !showPassword"
                     :error-messages="passwordErrors"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="showPassword ? 'text' : 'password'"
                     class="mt-4"
                     label="Sua senha"
                     name="password"
-                    placeholder="Sua senha com pelo menos 6 caracteres"
+                    placeholder="Pelo menos 6 caracteres"
                     prepend-icon="mdi-lock"
-                    type="password"
                   />
                 </v-card-text>
                 <v-card-actions>
@@ -72,6 +82,7 @@ export default {
     return {
       loading: false,
       hasError: false,
+      showPassword: false,
       form: {
         email: '',
         password: ''
