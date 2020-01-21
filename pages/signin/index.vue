@@ -12,8 +12,27 @@
                 max-height="87"
               />
             </v-layout>
+            <v-alert
+              v-model="hasError"
+              transition="fade-transition"
+              text
+              outlined
+              color="error"
+              border="left"
+              dismissible
+            >
+              Usuário ou senha inválidos.
+            </v-alert>
             <v-card outlined>
-              <v-form @submit.prevent="signIn">
+              <v-tabs centered>
+                <v-tab>
+                  Entrar
+                </v-tab>
+                <v-tab>
+                  Cadastrar
+                </v-tab>
+              </v-tabs>
+              <v-form @submit.prevent="onSignIn" class="mt-8">
                 <v-card-text>
                   <v-text-field
                     v-model="form.email"
@@ -27,13 +46,15 @@
                   />
                   <v-text-field
                     v-model="form.password"
+                    @click:append="showPassword = !showPassword"
                     :error-messages="passwordErrors"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="showPassword ? 'text' : 'password'"
                     class="mt-4"
                     label="Sua senha"
                     name="password"
-                    placeholder="Sua senha com pelo menos 6 caracteres"
+                    placeholder="Pelo menos 6 caracteres"
                     prepend-icon="mdi-lock"
-                    type="password"
                   />
                 </v-card-text>
                 <v-card-actions>
@@ -53,22 +74,19 @@
 
 <script>
 import { required, email, minLength } from 'vuelidate/lib/validators'
-import { firebaseAuth } from '@/plugins/firebase'
+import { mapActions } from 'vuex'
 
 export default {
+  layout: 'signin',
   data() {
     return {
       loading: false,
+      hasError: false,
+      showPassword: false,
       form: {
         email: '',
         password: ''
       }
-    }
-  },
-  validations: {
-    form: {
-      email: { required, email },
-      password: { required, minLength: minLength(6) }
     }
   },
   computed: {
@@ -88,19 +106,32 @@ export default {
       return errors
     }
   },
+  validations: {
+    form: {
+      email: { required, email },
+      password: { required, minLength: minLength(6) }
+    }
+  },
   methods: {
-    async signIn() {
+    ...mapActions({
+      signIn: 'auth/signInAsync'
+    }),
+    async onSignIn() {
       this.$v.$touch()
       if (this.$v.$invalid) return
 
       this.loading = true
 
       try {
-        await firebaseAuth.signInWithEmailAndPassword(
-          this.form.email,
-          this.form.password
-        )
-      } catch (error) {}
+        await this.signIn({
+          email: this.form.email,
+          password: this.form.password
+        })
+
+        this.$router.push('/dashboard')
+      } catch (error) {
+        this.hasError = true
+      }
       this.loading = false
     }
   }
