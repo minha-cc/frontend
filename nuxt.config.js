@@ -30,7 +30,9 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['@plugins/firebase.js', { src: '@plugins/vuelidate', ssr: false }],
+  plugins: ['@plugins/firebase.js',
+    { src: '@plugins/vuelidate', ssr: false },
+    '@plugins/firebaseAuth'],
   /*
    ** Nuxt.js dev-modules
    */
@@ -83,5 +85,8 @@ export default {
      ** You can extend webpack config here
      */
     extend(config, ctx) {}
+  },
+  router: {
+    middleware: 'auth'
   }
 }

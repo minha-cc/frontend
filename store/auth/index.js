@@ -1,6 +1,6 @@
 import { firebaseAuth } from '@/plugins/firebase'
 
-const state = () => ({
+export const state = () => ({
   currentUser: {}
 })
 
@@ -11,7 +11,7 @@ export const mutations = {
 }
 
 export const getters = {
-  getCurrentUser() {
+  getCurrentUser(state) {
     return state.currentUser
   }
 }
@@ -24,12 +24,15 @@ export const actions = {
         account.password
       )
     } catch (exception) {
-      mutations.setCurrentUser({})
+      context.commit('setCurrentUser', {})
       throw exception
     }
-
-    await firebaseAuth.onAuthStateChanged((user) =>
-      context.commit('setCurrentUser', user)
-    )
+  },
+  logout(context) {
+    context.commit('setCurrentUser', {})
+    localStorage.removeItem('firebaseUid')
+  },
+  setCurrentUser(context, payload) {
+    context.commit('setCurrentUser', payload)
   }
 }
