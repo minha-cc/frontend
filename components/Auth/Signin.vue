@@ -81,7 +81,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      signIn: 'auth/signInAsync'
+      signin: 'auth/signinAsync'
     }),
     async onSignIn() {
       this.$emit('onError', null)
@@ -90,7 +90,7 @@ export default {
       this.loading = true
 
       try {
-        await this.signIn({
+        await this.signin({
           email: this.form.email,
           password: this.form.password
         })

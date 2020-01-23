@@ -99,7 +99,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      signIn: 'auth/signInAsync'
+      signup: 'auth/signupAsync'
     }),
     async onSignup() {
       this.$emit('onError', null)
@@ -108,14 +108,22 @@ export default {
       this.loading = true
 
       try {
-        await this.signIn({
+        await this.signup({
+          name: this.form.name,
           email: this.form.email,
           password: this.form.password
         })
 
         this.$router.push('/dashboard')
       } catch (error) {
-        this.$emit('onError', 'Usuário ou senha inválidos.')
+        if (error.code === 'auth/email-already-in-use') {
+          this.$emit(
+            'onError',
+            'Esse email já está cadastrado no nosso sistema.'
+          )
+        } else {
+          this.$emit('onError', 'Não conseguimos criar seu usuário.')
+        }
       }
       this.loading = false
     }
