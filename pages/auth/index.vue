@@ -21,8 +21,14 @@
                 <v-tab>
                   Cadastrar
                 </v-tab>
+                <v-tabs-slider></v-tabs-slider>
+                <v-tab-item>
+                  <Signin @onError="message = $event" />
+                </v-tab-item>
+                <v-tab-item>
+                  <Signup @onError="message = $event" />
+                </v-tab-item>
               </v-tabs>
-              <Signin @onError="message = $event" />
             </v-card>
           </v-col>
         </v-row>
@@ -32,10 +38,12 @@
 </template>
 <script>
 import Signin from '@/components/Auth/Signin.vue'
+import Signup from '@/components/Auth/Signup.vue'
 import Alert from '@/components/Alert.vue'
 export default {
   components: {
     Signin,
+    Signup,
     Alert
   },
   data() {

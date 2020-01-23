@@ -10,8 +10,8 @@
                 :error-messages="emailErrors"
                 label="Seu email"
                 name="email"
-                placeholder="Email"
-                prepend-icon="mdi-account"
+                placeholder="seu@email.com.br"
+                prepend-icon="mdi-at"
                 type="email"
                 autofocus
               />
@@ -24,7 +24,7 @@
                 class="mt-4"
                 label="Sua senha"
                 name="password"
-                placeholder="Pelo menos 6 caracteres"
+                placeholder="Com pelo menos 6 caracteres"
                 prepend-icon="mdi-lock"
               />
             </v-card-text>
