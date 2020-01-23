@@ -3,13 +3,13 @@
     <v-container>
       <v-row align="center" justify="center">
         <v-col cols="12" sm="12" md="12">
-          <v-form @submit.prevent="onSignIn" class="mt-2">
+          <v-form @submit.prevent="onSignup" class="mt-2">
             <v-card-text>
               <v-text-field
-                v-model="form.name"
-                :error-messages="emailErrors"
+                v-model="form.username"
+                :error-messages="usernameErrors"
                 label="Seu nome"
-                name="name"
+                name="username"
                 placeholder="Nome"
                 prepend-icon="mdi-account"
                 type="text"
@@ -18,12 +18,12 @@
               <v-text-field
                 v-model="form.email"
                 :error-messages="emailErrors"
+                class="mt-4"
                 label="Seu email"
                 name="email"
                 placeholder="seu@email.com"
                 prepend-icon="mdi-at"
                 type="email"
-                autofocus
               />
               <v-text-field
                 v-model="form.password"
@@ -56,19 +56,24 @@ import { required, email, minLength } from 'vuelidate/lib/validators'
 import { mapActions } from 'vuex'
 
 export default {
-  layout: 'signin',
   data() {
     return {
       loading: false,
       showPassword: false,
       form: {
-        name: '',
+        username: '',
         email: '',
         password: ''
       }
     }
   },
   computed: {
+    usernameErrors() {
+      const errors = []
+      if (!this.$v.form.username.$dirty) return errors
+      !this.$v.form.username.required && errors.push('Nome é obrigatório.')
+      return errors
+    },
     emailErrors() {
       const errors = []
       if (!this.$v.form.email.$dirty) return errors
@@ -87,6 +92,7 @@ export default {
   },
   validations: {
     form: {
+      username: { required },
       email: { required, email },
       password: { required, minLength: minLength(6) }
     }
@@ -95,7 +101,7 @@ export default {
     ...mapActions({
       signIn: 'auth/signInAsync'
     }),
-    async onSignIn() {
+    async onSignup() {
       this.$emit('onError', null)
       this.$v.$touch()
       if (this.$v.$invalid) return

@@ -41,6 +41,7 @@ import Signin from '@/components/Auth/Signin.vue'
 import Signup from '@/components/Auth/Signup.vue'
 import Alert from '@/components/Alert.vue'
 export default {
+  layout: 'auth',
   components: {
     Signin,
     Signup,
