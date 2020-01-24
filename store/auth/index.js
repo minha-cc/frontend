@@ -17,12 +17,26 @@ export const getters = {
 }
 
 export const actions = {
-  async signInAsync(context, account) {
+  async signinAsync(context, account) {
     try {
       await firebaseAuth.signInWithEmailAndPassword(
         account.email,
         account.password
       )
+    } catch (exception) {
+      context.commit('setCurrentUser', {})
+      throw exception
+    }
+  },
+  async signupAsync(context, account) {
+    try {
+      await firebaseAuth.createUserWithEmailAndPassword(
+        account.email,
+        account.password
+      )
+      const user = await firebaseAuth.currentUser
+      await user.updateProfile({ displayName: account.username })
+      user.sendEmailVerification()
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
