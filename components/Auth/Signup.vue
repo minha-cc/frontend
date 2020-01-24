@@ -109,7 +109,7 @@ export default {
 
       try {
         await this.signup({
-          name: this.form.name,
+          username: this.form.username,
           email: this.form.email,
           password: this.form.password
         })

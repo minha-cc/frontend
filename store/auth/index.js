@@ -34,8 +34,9 @@ export const actions = {
         account.email,
         account.password
       )
-      const user = firebaseAuth.currentUser
-      await user.updateProfile({ displayName: account.name })
+      const user = await firebaseAuth.currentUser
+      await user.updateProfile({ displayName: account.username })
+      user.sendEmailVerification()
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
