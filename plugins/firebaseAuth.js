@@ -5,7 +5,7 @@ export default async (context) => {
     if (user) {
       const loggedInUser = {
         uid: user.uid,
-        name: user.name,
+        username: user.displayName,
         email: user.email
       }
       context.store.dispatch('auth/setCurrentUser', loggedInUser)

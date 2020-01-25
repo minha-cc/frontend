@@ -1,5 +1,20 @@
 <template>
   <v-app light>
+    <v-app-bar app dense flat color="secondary">
+      <v-img
+        :src="require('~/assets/images/reversed-minha-cc-logo.png')"
+        class="ml-8"
+        max-width="105"
+        max-height="24"
+      />
+      <v-spacer />
+      <h4>Olá, {{ currentUser.username }}</h4>
+      <v-avatar color="white" size="36" class="ml-4">
+        <span class="secondary--text headline">
+          {{ firstLetterName }}
+        </span>
+      </v-avatar>
+    </v-app-bar>
     <v-content>
       <v-container>
         <nuxt />
@@ -9,5 +24,18 @@
 </template>
 
 <script>
-export default {}
+import { mapGetters } from 'vuex'
+export default {
+  computed: {
+    ...mapGetters({ currentUser: 'auth/getCurrentUser' }),
+    firstLetterName() {
+      return this.currentUser.username.charAt(0).toUpperCase()
+    }
+  }
+}
 </script>
+<style scoped>
+h4 {
+  color: #fff;
+}
+</style>
