@@ -29,7 +29,10 @@ export default {
   computed: {
     ...mapGetters({ currentUser: 'auth/getCurrentUser' }),
     firstLetterName() {
-      return this.currentUser.username.charAt(0).toUpperCase()
+      if (this.currentUser.username) {
+        return this.currentUser.username.charAt(0).toUpperCase()
+      }
+      return null
     }
   }
 }
