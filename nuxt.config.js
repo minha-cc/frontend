@@ -64,11 +64,14 @@ export default {
     customVariables: ['~/assets/variables.scss'],
     theme: {
       light: true,
+      options: {
+        customProperties: true,
+      },
       themes: {
         light: {
-          primary: '#FF4E50',
+          primary: '#0399a0 ',
           accent: colors.grey.darken3,
-          secondary: '#32556d',
+          secondary: '#ff4e50',
           info: colors.teal.lighten1,
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,

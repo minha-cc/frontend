@@ -40,7 +40,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn :loading="loading" type="submit" color="primary">
+              <v-btn :loading="loading" type="submit" color="secondary">
                 Cadastrar
               </v-btn>
             </v-card-actions>

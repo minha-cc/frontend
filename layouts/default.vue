@@ -1,6 +1,6 @@
 <template>
   <v-app light>
-    <v-app-bar app dense flat color="secondary">
+    <v-app-bar app dense flat color="primary">
       <v-img
         :src="require('~/assets/images/reversed-minha-cc-logo.png')"
         class="ml-8"
@@ -10,7 +10,7 @@
       <v-spacer />
       <h4>Olá, {{ currentUser.username }}</h4>
       <v-avatar color="white" size="36" class="ml-4">
-        <span class="secondary--text headline">
+        <span class="primary--text headline">
           {{ firstLetterName }}
         </span>
       </v-avatar>
