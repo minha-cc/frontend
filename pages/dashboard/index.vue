@@ -103,6 +103,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.date"
+              :disabled="transaction.actions.disabled"
               label="Data da transação"
               placeholder="dd/mm/aaaa"
               required
@@ -112,6 +113,7 @@
           <v-col cols="12" md="4">
             <v-text-field
               v-model="transaction.description"
+              :disabled="transaction.actions.disabled"
               label="Descrição"
               placeholder="Supermercado, almoço, material escolar, salário"
               required
@@ -121,6 +123,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="transaction.transactionType"
+              :disabled="transaction.actions.disabled"
               :items="transactionTypes"
               :menu-props="{ top: true, offsetY: true }"
               placeholder=" "
@@ -131,21 +134,38 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.value"
+              :disabled="transaction.actions.disabled"
               label="Valor"
               prefix="R$"
+              placeholder="0,00"
               required
             >
             </v-text-field>
           </v-col>
           <v-col class="d-flex justify-center align-center">
-            <v-btn text icon x-small>
+            <v-btn
+              @click="saveTransaction(transaction)"
+              :disabled="transaction.actions.saveBtnDisabled"
+              icon
+              x-small
+              class="ml-1"
+            >
+              <v-icon>mdi-check</v-icon>
+            </v-btn>
+
+            <v-btn
+              @click="editTransaction(transaction)"
+              :disabled="transaction.actions.editBtnDisabled"
+              icon
+              x-small
+            >
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
             <v-btn
               @click="removeTransaction(transaction)"
+              :disabled="transaction.actions.deleteBtnDisabled"
               icon
               x-small
-              class="ml-1"
             >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -177,8 +197,6 @@
 export default {
   data() {
     return {
-      date: '',
-      description: '',
       transactionTypes: [
         'Açougue',
         'Alimentação',
@@ -192,28 +210,52 @@ export default {
           date: '22/01/2020',
           description: 'café da manhã',
           value: '9,40',
-          transactionType: 'Alimentação'
+          transactionType: 'Alimentação',
+          actions: {
+            disabled: true,
+            saveBtnDisabled: true,
+            editBtnDisabled: false,
+            deleteBtnDisabled: false
+          }
         },
         {
           id: '2',
           date: '22/01/2020',
           description: 'supermercado',
           value: '203,51',
-          transactionType: 'Supermercado'
+          transactionType: 'Supermercado',
+          actions: {
+            disabled: true,
+            saveBtnDisabled: true,
+            editBtnDisabled: false,
+            deleteBtnDisabled: false
+          }
         },
         {
           id: '3',
           date: '23/01/2020',
           description: 'supermercado',
           value: '25,40',
-          transactionType: 'Supermercado'
+          transactionType: 'Supermercado',
+          actions: {
+            disabled: true,
+            saveBtnDisabled: true,
+            editBtnDisabled: false,
+            deleteBtnDisabled: false
+          }
         },
         {
           id: '4',
           date: '23/01/2020',
           description: 'supermercado',
           value: '5,30',
-          transactionType: 'Supermercado'
+          transactionType: 'Supermercado',
+          actions: {
+            disabled: true,
+            saveBtnDisabled: true,
+            editBtnDisabled: false,
+            deleteBtnDisabled: false
+          }
         }
       ]
     }
@@ -222,13 +264,32 @@ export default {
     createTransaction() {
       const transaction = {
         id: 0,
-        date: 'dd/mm/aaaa',
+        date: '',
         description: '',
-        value: '0,00',
-        transactionType: ''
+        value: '',
+        transactionType: '',
+        actions: {
+          disabled: true,
+          saveBtnDisabled: true,
+          editBtnDisabled: false,
+          deleteBtnDisabled: false
+        }
       }
 
       this.transactions.push(transaction)
+    },
+    editTransaction(transactionToEdit) {
+      transactionToEdit.actions = {
+        disabled: false,
+        saveBtnDisabled: false,
+        editBtnDisabled: true,
+        deleteBtnDisabled: true
+      }
+      this.transactions.map((transaction) =>
+        transaction.id === transactionToEdit.id
+          ? { ...this.transactions, ...transactionToEdit }
+          : transaction
+      )
     },
     removeTransaction(transaction) {
       this.transactions.splice(this.transactions.indexOf(transaction), 1)
