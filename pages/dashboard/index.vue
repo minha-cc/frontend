@@ -1,7 +1,7 @@
 <template>
-  <v-card outlined>
-    <v-container>
-      <v-row justify="center">
+  <v-container>
+    <v-card outlined>
+      <v-row justify="center" class="mt-2">
         <v-btn icon text color="primary" large>
           <v-icon>mdi-arrow-left-drop-circle</v-icon>
         </v-btn>
@@ -11,7 +11,7 @@
         </v-btn>
       </v-row>
       <v-divider class="mt-2" />
-      <v-row>
+      <v-row class="ml-2 mr-2">
         <v-col sm="4" lg="4">
           <v-row>
             <v-col>
@@ -87,7 +87,8 @@
           </v-row>
         </v-col>
       </v-row>
-      <v-divider />
+    </v-card>
+    <v-card outlined class="mt-2">
       <v-row class="font-weight-light">
         <v-col cols="12" md="12" class="ml-2">
           Transações do mês
@@ -159,17 +160,17 @@
               fab
               color="primary"
               small
-              absolute
               bottom
               right
+              fixed
             >
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </v-fab-transition>
         </v-col>
       </v-row>
-    </v-container>
-  </v-card>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
