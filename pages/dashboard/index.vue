@@ -143,32 +143,45 @@
             </v-text-field>
           </v-col>
           <v-col class="d-flex justify-center align-center">
-            <v-btn
-              @click="saveTransaction(transaction)"
-              :disabled="transaction.actions.saveBtnDisabled"
-              icon
-              x-small
-              class="ml-1"
-            >
-              <v-icon>mdi-check</v-icon>
-            </v-btn>
+            <template v-if="editing">
+              <v-btn
+                @click="saveTransaction(transaction)"
+                :disabled="transaction.actions.saveBtnDisabled"
+                icon
+                x-small
+                class="ml-1"
+              >
+                <v-icon>mdi-check</v-icon>
+              </v-btn>
 
-            <v-btn
-              @click="editTransaction(transaction)"
-              :disabled="transaction.actions.editBtnDisabled"
-              icon
-              x-small
-            >
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn
-              @click="removeTransaction(transaction)"
-              :disabled="transaction.actions.deleteBtnDisabled"
-              icon
-              x-small
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
+              <v-btn
+                @click="cancelTransaction(transaction)"
+                :disabled="transaction.actions.saveBtnDisabled"
+                icon
+                x-small
+                class="ml-1"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </template>
+            <template v-else>
+              <v-btn
+                @click="editTransaction(transaction)"
+                :disabled="transaction.actions.editBtnDisabled"
+                icon
+                x-small
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn
+                @click="removeTransaction(transaction)"
+                :disabled="transaction.actions.deleteBtnDisabled"
+                icon
+                x-small
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
           </v-col>
         </v-row>
       </v-scale-transition>
@@ -177,6 +190,7 @@
           <v-fab-transition>
             <v-btn
               @click="createTransaction"
+              :disabled="editing"
               fab
               color="primary"
               small
@@ -197,6 +211,8 @@
 export default {
   data() {
     return {
+      canAdd: true,
+      editing: false,
       transactionTypes: [
         'Açougue',
         'Alimentação',
@@ -204,6 +220,7 @@ export default {
         'Bar/ restaurante',
         'Supermercado'
       ],
+      selectedTransaction: null,
       transactions: [
         {
           id: '1',
@@ -275,28 +292,61 @@ export default {
           deleteBtnDisabled: true
         }
       }
-
+      this.editing = true
       this.transactions.unshift(transaction)
     },
-    saveTransaction() {
-      this.transactions.push(this.transaction)
-      this.createTransaction()
+    saveTransaction(editedTransaction) {
+      editedTransaction.actions = {
+        disabled: true,
+        saveBtnDisabled: true,
+        editBtnDisabled: false,
+        deleteBtnDisabled: false
+      }
+      if (editedTransaction.id !== 0) {
+        this.transactions.map((transaction) =>
+          transaction.id === editedTransaction.id
+            ? { ...this.transactions, ...editedTransaction }
+            : transaction
+        )
+      } else {
+        this.transactions.push(editedTransaction)
+      }
+      this.editing = false
     },
     editTransaction(transactionToEdit) {
+      this.editing = true
+      this.selectedTransaction = Object.assign({}, transactionToEdit)
       transactionToEdit.actions = {
         disabled: false,
         saveBtnDisabled: false,
         editBtnDisabled: true,
         deleteBtnDisabled: true
       }
-      this.transactions.map((transaction) =>
-        transaction.id === transactionToEdit.id
-          ? { ...this.transactions, ...transactionToEdit }
-          : transaction
-      )
     },
     removeTransaction(transaction) {
       this.transactions.splice(this.transactions.indexOf(transaction), 1)
+      this.editing = false
+    },
+    cancelTransaction(transactionToCancel) {
+      if (transactionToCancel.id === 0) {
+        this.transactions.splice(
+          this.transactions.indexOf(transactionToCancel),
+          1
+        )
+      } else {
+        this.selectedTransaction.actions = {
+          disabled: true,
+          saveBtnDisabled: true,
+          editBtnDisabled: false,
+          deleteBtnDisabled: false
+        }
+        this.transactions = this.transactions.map((transaction) =>
+          transaction.id === this.selectedTransaction.id
+            ? this.selectedTransaction
+            : transaction
+        )
+      }
+      this.editing = false
     }
   }
 }
