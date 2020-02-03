@@ -269,14 +269,18 @@ export default {
         value: '',
         transactionType: '',
         actions: {
-          disabled: true,
-          saveBtnDisabled: true,
-          editBtnDisabled: false,
-          deleteBtnDisabled: false
+          disabled: false,
+          saveBtnDisabled: false,
+          editBtnDisabled: true,
+          deleteBtnDisabled: true
         }
       }
 
-      this.transactions.push(transaction)
+      this.transactions.unshift(transaction)
+    },
+    saveTransaction() {
+      this.transactions.push(this.transaction)
+      this.createTransaction()
     },
     editTransaction(transactionToEdit) {
       transactionToEdit.actions = {
