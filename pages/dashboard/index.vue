@@ -205,7 +205,7 @@
               :disabled="editing"
               fab
               color="primary"
-              small
+              big
               bottom
               right
               fixed
@@ -238,7 +238,7 @@ export default {
         'Bar/ restaurante',
         'Supermercado'
       ],
-      selectedTransaction: null,
+      editingTransaction: null,
       dateMask: '##/##/####',
       transactions: [
         {
@@ -313,57 +313,66 @@ export default {
         }
       }
       this.editing = true
-      this.selectedTransaction = transaction
+      this.editingTransaction = transaction
       this.transactions.unshift(transaction)
+      this.validationErrors = {
+        date: false,
+        description: false,
+        transactionType: false,
+        value: false
+      }
     },
-    saveTransaction(editedTransaction) {
-      this.selectedTransaction = editedTransaction
+    saveTransaction(selectedTransactionToSave) {
+      this.editingTransaction = selectedTransactionToSave
       if (!this.validate()) return
 
-      editedTransaction.actions = {
+      selectedTransactionToSave.actions = {
         disabled: true,
         saveBtnDisabled: true,
         editBtnDisabled: false,
         deleteBtnDisabled: false
       }
       this.transactions.map((transaction) =>
-        transaction.id === editedTransaction.id
-          ? { ...this.transactions, ...editedTransaction }
+        transaction.id === this.editingTransaction.id
+          ? { ...this.transactions, ...this.editingTransaction }
           : transaction
       )
       this.editing = false
     },
-    editTransaction(transactionToEdit) {
+    editTransaction(selectedTransactiontoEdit) {
       this.editing = true
-      this.selectedTransaction = Object.assign({}, transactionToEdit)
-      this.selectedTransaction.newTransaction = false
-      transactionToEdit.actions = {
+      this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
+      this.editingTransaction.newTransaction = false
+      selectedTransactiontoEdit.actions = {
         disabled: false,
         saveBtnDisabled: false,
         editBtnDisabled: true,
         deleteBtnDisabled: true
       }
     },
-    removeTransaction(transaction) {
-      this.transactions.splice(this.transactions.indexOf(transaction), 1)
+    removeTransaction(selectedTransationToRemove) {
+      this.transactions.splice(
+        this.transactions.indexOf(selectedTransationToRemove),
+        1
+      )
       this.editing = false
     },
-    cancelTransaction(transactionToCancel) {
-      if (transactionToCancel.newTransaction) {
+    cancelTransaction(selectedTransactionToCancel) {
+      if (selectedTransactionToCancel.newTransaction) {
         this.transactions.splice(
-          this.transactions.indexOf(transactionToCancel),
+          this.transactions.indexOf(selectedTransactionToCancel),
           1
         )
       } else {
-        this.selectedTransaction.actions = {
+        this.selectedTransactionToCancel.actions = {
           disabled: true,
           saveBtnDisabled: true,
           editBtnDisabled: false,
           deleteBtnDisabled: false
         }
         this.transactions = this.transactions.map((transaction) =>
-          transaction.id === this.selectedTransaction.id
-            ? this.selectedTransaction
+          transaction.id === this.selectedTransactionToCancel.id
+            ? this.selectedTransactionToCancel
             : transaction
         )
       }
@@ -389,19 +398,19 @@ export default {
     },
     validate() {
       let valid = true
-      if (this.selectedTransaction.date === '') {
+      if (this.editingTransaction.date === '') {
         this.validationErrors.date = true
         valid = false
       }
-      if (this.selectedTransaction.description === '') {
+      if (this.editingTransaction.description === '') {
         this.validationErrors.description = true
         valid = false
       }
-      if (this.selectedTransaction.transactionType === '') {
+      if (this.editingTransaction.transactionType === '') {
         this.validationErrors.transactionType = true
         valid = false
       }
-      if (this.selectedTransaction.value === '') {
+      if (this.editingTransaction.value === '') {
         this.validationErrors.value = true
         valid = false
       }
