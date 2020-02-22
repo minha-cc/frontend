@@ -30,9 +30,12 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['@plugins/firebase.js',
+  plugins: [
+    '@plugins/firebase.js',
     { src: '@plugins/vuelidate', ssr: false },
-    '@plugins/firebaseAuth'],
+    '@plugins/firebaseAuth',
+    '@plugins/mask.js'
+  ],
   /*
    ** Nuxt.js dev-modules
    */

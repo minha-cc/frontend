@@ -94,97 +94,109 @@
           Transações do mês
         </v-col>
       </v-row>
-      <v-scale-transition group>
-        <v-row
-          v-for="transaction in transactions"
-          :key="transaction.id"
-          class="ml-2"
-        >
-          <v-col cols="12" md="2">
-            <v-text-field
-              v-model="transaction.date"
-              :disabled="transaction.actions.disabled"
-              label="Data da transação"
-              placeholder="dd/mm/aaaa"
-              required
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="transaction.description"
-              :disabled="transaction.actions.disabled"
-              label="Descrição"
-              placeholder="Supermercado, almoço, material escolar, salário"
-              required
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="transaction.transactionType"
-              :disabled="transaction.actions.disabled"
-              :items="transactionTypes"
-              :menu-props="{ top: true, offsetY: true }"
-              placeholder=" "
-              label="Tipo de transação"
-            >
-            </v-select>
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-text-field
-              v-model="transaction.value"
-              :disabled="transaction.actions.disabled"
-              label="Valor"
-              prefix="R$"
-              placeholder="0,00"
-              required
-            >
-            </v-text-field>
-          </v-col>
-          <v-col class="d-flex justify-center align-center">
-            <template v-if="editing">
-              <v-btn
-                @click="saveTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
-                icon
-                x-small
-                class="ml-1"
+      <v-form>
+        <v-scale-transition group>
+          <v-row
+            v-for="transaction in transactions"
+            :key="transaction.id"
+            class="ml-2"
+          >
+            <v-col cols="12" md="2">
+              <v-text-field
+                v-model="transaction.date"
+                :disabled="transaction.actions.disabled"
+                v-mask="dateMask"
+                :error="validationErrors.date"
+                name="date"
+                label="Data da transação"
+                placeholder="dd/mm/aaaa"
+                required
               >
-                <v-icon>mdi-check</v-icon>
-              </v-btn>
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="transaction.description"
+                :disabled="transaction.actions.disabled"
+                :error="validationErrors.description"
+                name="description"
+                label="Descrição"
+                placeholder="Supermercado, almoço, material escolar, salário"
+                required
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="transaction.transactionType"
+                :disabled="transaction.actions.disabled"
+                :items="transactionTypes"
+                :menu-props="{ top: true, offsetY: true }"
+                :error="validationErrors.transactionType"
+                name="type"
+                placeholder=" "
+                label="Tipo de transação"
+                required
+              >
+              </v-select>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                v-model="transaction.value"
+                :disabled="transaction.actions.disabled"
+                :error="validationErrors.value"
+                name="value"
+                label="Valor"
+                prefix="R$"
+                placeholder="0,00"
+                required
+              >
+              </v-text-field>
+            </v-col>
+            <v-col class="d-flex justify-center align-center">
+              <template v-if="editing">
+                <v-btn
+                  @click="saveTransaction(transaction)"
+                  :disabled="transaction.actions.saveBtnDisabled"
+                  icon
+                  x-small
+                  class="ml-1"
+                >
+                  <v-icon>mdi-check</v-icon>
+                </v-btn>
 
-              <v-btn
-                @click="cancelTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
-                icon
-                x-small
-                class="ml-1"
-              >
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </template>
-            <template v-else>
-              <v-btn
-                @click="editTransaction(transaction)"
-                :disabled="transaction.actions.editBtnDisabled"
-                icon
-                x-small
-              >
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn
-                @click="removeTransaction(transaction)"
-                :disabled="transaction.actions.deleteBtnDisabled"
-                icon
-                x-small
-              >
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </template>
-          </v-col>
-        </v-row>
-      </v-scale-transition>
+                <v-btn
+                  @click="cancelTransaction(transaction)"
+                  :disabled="transaction.actions.saveBtnDisabled"
+                  icon
+                  x-small
+                  class="ml-1"
+                >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </template>
+              <template v-else>
+                <v-btn
+                  @click="editTransaction(transaction)"
+                  :disabled="transaction.actions.editBtnDisabled"
+                  icon
+                  x-small
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn
+                  @click="removeTransaction(transaction)"
+                  :disabled="transaction.actions.deleteBtnDisabled"
+                  icon
+                  x-small
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </template>
+            </v-col>
+          </v-row>
+        </v-scale-transition>
+      </v-form>
       <v-row>
         <v-col>
           <v-fab-transition>
@@ -213,6 +225,12 @@ export default {
     return {
       canAdd: true,
       editing: false,
+      validationErrors: {
+        date: false,
+        description: false,
+        transactionType: false,
+        value: false
+      },
       transactionTypes: [
         'Açougue',
         'Alimentação',
@@ -221,6 +239,7 @@ export default {
         'Supermercado'
       ],
       selectedTransaction: null,
+      dateMask: '##/##/####',
       transactions: [
         {
           id: '1',
@@ -294,9 +313,13 @@ export default {
         }
       }
       this.editing = true
+      this.selectedTransaction = transaction
       this.transactions.unshift(transaction)
     },
     saveTransaction(editedTransaction) {
+      this.selectedTransaction = editedTransaction
+      if (!this.validate()) return
+
       editedTransaction.actions = {
         disabled: true,
         saveBtnDisabled: true,
@@ -363,6 +386,26 @@ export default {
         }
       )
       return newGuid
+    },
+    validate() {
+      let valid = true
+      if (this.selectedTransaction.date === '') {
+        this.validationErrors.date = true
+        valid = false
+      }
+      if (this.selectedTransaction.description === '') {
+        this.validationErrors.description = true
+        valid = false
+      }
+      if (this.selectedTransaction.transactionType === '') {
+        this.validationErrors.transactionType = true
+        valid = false
+      }
+      if (this.selectedTransaction.value === '') {
+        this.validationErrors.value = true
+        valid = false
+      }
+      return valid
     }
   }
 }
