@@ -7,8 +7,8 @@
             <v-img
               :src="require('~/assets/images/minha-cc-logo.png')"
               aspect-ratio="1"
-              max-width="238"
-              max-height="87"
+              max-width="224"
+              max-height="54"
             />
           </v-layout>
           <Alert :message="message" />
