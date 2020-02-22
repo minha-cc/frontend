@@ -14,76 +14,16 @@
       <v-row class="ml-2 mr-2">
         <v-col sm="4" lg="4">
           <v-row>
-            <v-col>
-              <v-card max-width="160" width="160">
-                <v-card-title>
-                  <span class="text-right">Entradas</span>
-                </v-card-title>
-                <v-divider />
-                <v-list-item one-line>
-                  <v-list-item-content class="income">
-                    <div class="raised mb-4">R$9.000,00</div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-card>
-            </v-col>
-            <v-col>
-              <v-card max-width="160" width="160">
-                <v-card-title class="outcome">
-                  Saídas
-                </v-card-title>
-                <v-divider />
-                <v-list-item one-line>
-                  <v-list-item-content class="outcome">
-                    <div class="raised mb-4">R$9.000,00</div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-card>
-            </v-col>
+            <Cart title="Entradas" cart-class="income" value="90000" />
+            <Cart title="Saídas" cart-class="outcome" />
           </v-row>
         </v-col>
         <v-spacer />
         <v-col sm="6" lg="6">
           <v-row>
-            <v-col>
-              <v-card max-width="160" width="160">
-                <v-card-title>
-                  <span class="text-right">Essenciais (50%)</span>
-                </v-card-title>
-                <v-divider />
-                <v-list-item one-line>
-                  <v-list-item-content class="planning">
-                    <div class="raised mb-4">R$9.000,00</div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-card>
-            </v-col>
-            <v-col>
-              <v-card max-width="160" width="160">
-                <v-card-title>
-                  <span class="text-right">Desejos (30%)</span>
-                </v-card-title>
-                <v-divider />
-                <v-list-item one-line>
-                  <v-list-item-content class="planning">
-                    <div class="raised mb-4">R$9.000,00</div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-card>
-            </v-col>
-            <v-col>
-              <v-card max-width="160" width="160">
-                <v-card-title>
-                  <span class="text-right">Investimentos (20%)</span>
-                </v-card-title>
-                <v-divider />
-                <v-list-item one-line>
-                  <v-list-item-content class="planning">
-                    <div class="raised mb-4">R$9.000,00</div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-card>
-            </v-col>
+            <Cart title="Essenciais (50%)" cart-class="planning" />
+            <Cart title="Desejos (30%)" cart-class="planning" />
+            <Cart title="Investimentos (20%)" cart-class="planning" />
           </v-row>
         </v-col>
       </v-row>
@@ -220,7 +160,13 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import Cart from '@/components/Cart/Value.vue'
+
 export default {
+  components: {
+    Cart
+  },
   data() {
     return {
       canAdd: true,
@@ -378,6 +324,9 @@ export default {
       }
       this.editing = false
     },
+    computed: {
+      ...mapGetters({ cart: 'cart/getCart' })
+    },
     generateUUID() {
       let d = new Date().getTime()
       if (
@@ -419,28 +368,3 @@ export default {
   }
 }
 </script>
-<style scoped>
-.v-card .v-card__title {
-  justify-content: flex-end;
-  font-size: 0.9em;
-  height: 30px;
-  padding: 1px 10px 10px 10px;
-  font-weight: lighter;
-}
-.v-list-item__content {
-  font-weight: bolder;
-  text-align: right;
-}
-.v-list-item__content.income {
-  color: #4caf50;
-}
-.v-list-item__content.outcome {
-  color: #f44336;
-}
-.v-list-item__content.planning {
-  color: var(--v-primary-base);
-}
-.v-input {
-  font-size: 12px;
-}
-</style>
