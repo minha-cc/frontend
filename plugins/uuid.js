@@ -17,4 +17,4 @@ function generateUUID() {
   return newGuid
 }
 
-export const uuid = generateUUID()
+export { generateUUID as uuid }

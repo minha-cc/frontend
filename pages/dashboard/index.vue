@@ -241,66 +241,13 @@ export default {
       ],
       selectedTransaction: null,
       dateMask: '##/##/####',
-      transactions: [
-        {
-          id: '1',
-          date: '22/01/2020',
-          description: 'café da manhã',
-          value: '9,40',
-          transactionType: 'Alimentação',
-          actions: {
-            disabled: true,
-            saveBtnDisabled: true,
-            editBtnDisabled: false,
-            deleteBtnDisabled: false
-          }
-        },
-        {
-          id: '2',
-          date: '22/01/2020',
-          description: 'supermercado',
-          value: '203,51',
-          transactionType: 'Supermercado',
-          actions: {
-            disabled: true,
-            saveBtnDisabled: true,
-            editBtnDisabled: false,
-            deleteBtnDisabled: false
-          }
-        },
-        {
-          id: '3',
-          date: '23/01/2020',
-          description: 'supermercado',
-          value: '25,40',
-          transactionType: 'Supermercado',
-          actions: {
-            disabled: true,
-            saveBtnDisabled: true,
-            editBtnDisabled: false,
-            deleteBtnDisabled: false
-          }
-        },
-        {
-          id: '4',
-          date: '23/01/2020',
-          description: 'supermercado',
-          value: '5,30',
-          transactionType: 'Supermercado',
-          actions: {
-            disabled: true,
-            saveBtnDisabled: true,
-            editBtnDisabled: false,
-            deleteBtnDisabled: false
-          }
-        }
-      ]
+      transactions: []
     }
   },
   methods: {
     createTransaction() {
       const transaction = {
-        id: uuid,
+        id: uuid(),
         date: '',
         description: '',
         value: '',
