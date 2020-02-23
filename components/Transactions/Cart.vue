@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider />
       <v-list-item one-line>
-        <v-list-item-content :class="cartClass">
+        <v-list-item-content :class="valueClass">
           <div class="raised mb-4">{{ value | currency }}</div>
         </v-list-item-content>
       </v-list-item>
@@ -21,7 +21,7 @@ export default {
       type: String,
       default: null
     },
-    cartClass: {
+    valueClass: {
       type: String,
       default: 'planning'
     },

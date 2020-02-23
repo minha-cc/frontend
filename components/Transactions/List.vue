@@ -1,59 +1,138 @@
 <template>
-  <v-container>
-    <v-card outlined>
-      <v-row justify="center" class="mt-2">
-        <v-btn icon text color="primary" large>
-          <v-icon>mdi-arrow-left-drop-circle</v-icon>
-        </v-btn>
-        <v-btn rounded color="primary" outlined large>02/2020</v-btn>
-        <v-btn icon text color="primary" large>
-          <v-icon>mdi-arrow-right-drop-circle</v-icon>
-        </v-btn>
-      </v-row>
-      <v-divider class="mt-2" />
-      <v-row class="ml-2 mr-2">
-        <v-col sm="4" lg="4">
-          <v-row>
-            <Cart :value="income" title="Entradas" value-class="income" />
-            <Cart :value="outcome" title="Saídas" value-class="outcome" />
-          </v-row>
-        </v-col>
-        <v-spacer />
-        <v-col sm="6" lg="6">
-          <v-row>
-            <Cart
-              :value="essential_expenses"
-              title="Essenciais (50%)"
-              value-class="planning"
-            />
-            <Cart
-              :value="personal_whises"
-              title="Desejos (30%)"
-              value-class="planning"
-            />
-            <Cart
-              :value="savings"
-              title="Investimentos (20%)"
-              value-class="planning"
-            />
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-card>
-    <Transactions />
-  </v-container>
+  <v-card outlined class="mt-2">
+    <v-row class="font-weight-light">
+      <v-col cols="12" md="12" class="ml-2">
+        Transações do mês
+      </v-col>
+    </v-row>
+    <v-form>
+      <v-scale-transition group>
+        <v-row
+          v-for="transaction in transactions"
+          :key="transaction.id"
+          class="ml-2"
+        >
+          <v-col cols="12" md="2">
+            <v-text-field
+              v-model="transaction.date"
+              :disabled="transaction.actions.disabled"
+              v-mask="dateMask"
+              :error="validationErrors.date"
+              name="date"
+              label="Data da transação"
+              placeholder="dd/mm/aaaa"
+              required
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="transaction.description"
+              :disabled="transaction.actions.disabled"
+              :error="validationErrors.description"
+              name="description"
+              label="Descrição"
+              placeholder="Supermercado, almoço, material escolar, salário"
+              required
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-select
+              v-model="transaction.transactionType"
+              :disabled="transaction.actions.disabled"
+              :items="transactionTypes"
+              :menu-props="{ top: true, offsetY: true }"
+              :error="validationErrors.transactionType"
+              name="type"
+              placeholder=" "
+              label="Tipo de transação"
+              required
+            >
+            </v-select>
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-text-field
+              v-model="transaction.value"
+              :disabled="transaction.actions.disabled"
+              :error="validationErrors.value"
+              name="value"
+              label="Valor"
+              prefix="R$"
+              placeholder="0,00"
+              required
+            >
+            </v-text-field>
+          </v-col>
+          <v-col class="d-flex justify-center align-center">
+            <template v-if="editing">
+              <v-btn
+                @click="saveTransaction(transaction)"
+                :disabled="transaction.actions.saveBtnDisabled"
+                icon
+                x-small
+                class="ml-1"
+              >
+                <v-icon>mdi-check</v-icon>
+              </v-btn>
+
+              <v-btn
+                @click="cancelTransaction(transaction)"
+                :disabled="transaction.actions.saveBtnDisabled"
+                icon
+                x-small
+                class="ml-1"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </template>
+            <template v-else>
+              <v-btn
+                @click="editTransaction(transaction)"
+                :disabled="transaction.actions.editBtnDisabled"
+                icon
+                x-small
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn
+                @click="removeTransaction(transaction)"
+                :disabled="transaction.actions.deleteBtnDisabled"
+                icon
+                x-small
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-col>
+        </v-row>
+      </v-scale-transition>
+    </v-form>
+    <v-row>
+      <v-col>
+        <v-fab-transition>
+          <v-btn
+            @click="createTransaction"
+            :disabled="editing"
+            fab
+            color="primary"
+            big
+            bottom
+            right
+            fixed
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </v-fab-transition>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import Cart from '@/components/Transactions/Cart.vue'
-import Transactions from '@/components/Transactions/List.vue'
 
 export default {
-  components: {
-    Cart,
-    Transactions
-  },
   data() {
     return {
       canAdd: true,
