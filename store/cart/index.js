@@ -1,5 +1,11 @@
 export const state = () => ({
-  cart: {}
+  cart: {
+    income: 0.0,
+    outcome: 0.0,
+    essential_expenses: 0.0,
+    personal_whises: 0.0,
+    savings: 0.0
+  }
 })
 
 export const mutations = {
