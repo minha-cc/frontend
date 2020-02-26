@@ -34,7 +34,8 @@ export default {
     '@plugins/firebase.js',
     { src: '@plugins/vuelidate', ssr: false },
     '@plugins/firebaseAuth',
-    '@plugins/mask.js'
+    '@plugins/mask.js',
+    '@plugins/uuid'
   ],
   /*
    ** Nuxt.js dev-modules
@@ -68,7 +69,7 @@ export default {
     theme: {
       light: true,
       options: {
-        customProperties: true,
+        customProperties: true
       },
       themes: {
         light: {

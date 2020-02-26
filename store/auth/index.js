@@ -1,4 +1,5 @@
-import { firebaseAuth } from '@/plugins/firebase'
+import { uuid } from '@/plugins/uuid'
+import { firebaseAuth, db } from '@/plugins/firebase'
 
 export const state = () => ({
   currentUser: {}
@@ -17,26 +18,27 @@ export const getters = {
 }
 
 export const actions = {
-  async signinAsync(context, account) {
+  async signinAsync(context, user) {
     try {
-      await firebaseAuth.signInWithEmailAndPassword(
-        account.email,
-        account.password
-      )
+      await firebaseAuth.signInWithEmailAndPassword(user.email, user.password)
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
     }
   },
-  async signupAsync(context, account) {
+  async signupAsync(context, userInfo) {
     try {
+      const accountId = uuid()
       await firebaseAuth.createUserWithEmailAndPassword(
-        account.email,
-        account.password
+        userInfo.email,
+        userInfo.password
       )
       const user = await firebaseAuth.currentUser
-      await user.updateProfile({ displayName: account.username })
-      user.sendEmailVerification()
+      await user.updateProfile({ displayName: userInfo.username })
+      await db
+        .collection('accounts')
+        .doc(user.uid)
+        .set({ accountId })
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
@@ -44,7 +46,6 @@ export const actions = {
   },
   logout(context) {
     context.commit('setCurrentUser', {})
-    localStorage.removeItem('firebaseUid')
   },
   setCurrentUser(context, payload) {
     context.commit('setCurrentUser', payload)

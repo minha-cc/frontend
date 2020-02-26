@@ -1,11 +1,12 @@
 import { AUTH_PATH } from '@/MinhaCCConstants'
 
 export default function({ store, redirect, route }) {
-  const firebaseUid = localStorage.getItem('firebaseUid')
-  if (firebaseUid != null && route.name === AUTH_PATH) {
+  const signedIn = store.state.auth.currentUser.uid
+
+  if (signedIn && route.name === AUTH_PATH) {
     redirect('/dashboard')
   }
-  if (firebaseUid == null && isInternalRoute(route)) {
+  if (!signedIn && isInternalRoute(route)) {
     redirect(`/${AUTH_PATH}`)
   }
 }

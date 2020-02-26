@@ -1,18 +1,28 @@
-import { firebaseAuth } from '@/plugins/firebase'
+import { firebaseAuth, db } from '@/plugins/firebase'
 
-export default async (context) => {
-  await firebaseAuth.onAuthStateChanged((user) => {
-    if (user) {
-      const loggedInUser = {
-        uid: user.uid,
-        username: user.displayName,
-        email: user.email
+export default (context) => {
+  const accounts = db.collection('accounts')
+
+  return new Promise((resolve, reject) => {
+    firebaseAuth.onAuthStateChanged((user) => {
+      if (!user) {
+        return resolve()
       }
-      context.store.dispatch('auth/setCurrentUser', loggedInUser)
-      localStorage.setItem('firebaseUid', loggedInUser.uid)
-    } else {
-      context.store.dispatch('auth/setCurrentUser', {})
-      localStorage.removeItem('firebaseUid')
-    }
+      accounts
+        .doc(user.uid)
+        .get()
+        .then((doc) => {
+          const accountId = doc.data()
+          const loggedInUser = {
+            uid: user.uid,
+            username: user.displayName,
+            email: user.email,
+            accountId: accountId.accountId
+          }
+          return resolve(
+            context.store.dispatch('auth/setCurrentUser', loggedInUser)
+          )
+        })
+    })
   })
 }
