@@ -1,8 +1,6 @@
 import { uuid } from '@/plugins/uuid'
 import { firebaseAuth, db } from '@/plugins/firebase'
 
-const accounts = db.collection('accounts')
-
 export const state = () => ({
   currentUser: {}
 })
@@ -23,16 +21,6 @@ export const actions = {
   async signinAsync(context, user) {
     try {
       await firebaseAuth.signInWithEmailAndPassword(user.email, user.password)
-      const signedInUser = await firebaseAuth.currentUser
-      const accountIdRef = await accounts.doc(signedInUser.uid).get()
-      const accountId = accountIdRef.data()
-      const signedIn = {
-        uid: signedInUser.uid,
-        username: signedInUser.displayName,
-        email: signedInUser.email,
-        accountId: accountId.accountId
-      }
-      context.commit('setCurrentUser', signedIn)
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
@@ -51,14 +39,6 @@ export const actions = {
         .collection('accounts')
         .doc(user.uid)
         .set({ accountId })
-
-      const signedInUser = {
-        uid: user.uid,
-        username: user.displayName,
-        email: user.email,
-        accountId
-      }
-      context.commit('setCurrentUser', signedInUser)
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
