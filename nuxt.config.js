@@ -69,7 +69,7 @@ export default {
     theme: {
       light: true,
       options: {
-        customProperties: true,
+        customProperties: true
       },
       themes: {
         light: {
