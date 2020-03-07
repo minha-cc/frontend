@@ -12,16 +12,20 @@ export default (context) => {
         .doc(user.uid)
         .get()
         .then((doc) => {
-          const accountId = doc.data()
-          const loggedInUser = {
-            uid: user.uid,
-            username: user.displayName,
-            email: user.email,
-            accountId: accountId.accountId
+          if (doc.exists) {
+            const accountId = doc.data()
+            const loggedInUser = {
+              uid: user.uid,
+              username: user.displayName,
+              email: user.email,
+              accountId
+            }
+            return resolve(
+              context.store.dispatch('auth/setCurrentUser', loggedInUser)
+            )
+          } else {
+            return resolve()
           }
-          return resolve(
-            context.store.dispatch('auth/setCurrentUser', loggedInUser)
-          )
         })
     })
   })
