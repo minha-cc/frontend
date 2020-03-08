@@ -1,13 +1,12 @@
 import { firebaseAuth, db } from '@/plugins/firebase'
 
 export default (context) => {
-  const accounts = db.collection('accounts')
-
   return new Promise((resolve, reject) => {
     firebaseAuth.onAuthStateChanged((user) => {
       if (!user) {
         return resolve()
       }
+      const accounts = db.collection('accounts')
       accounts
         .doc(user.uid)
         .get()
