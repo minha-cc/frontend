@@ -41,11 +41,11 @@
             <v-select
               v-model="transaction.transactionType"
               :disabled="transaction.actions.disabled"
-              :items="transactionTypes"
-              :item-value="transactionTypes.description"
-              :item-text="transactionTypes.description"
               :menu-props="{ top: true, offsetY: true }"
               :error="validationErrors.transactionType"
+              :items="transactionTypes"
+              item-text="description"
+              item-value="description"
               placeholder=" "
               label="Tipo de transação"
               required
@@ -139,13 +139,13 @@ export default {
     return {
       canAdd: true,
       editing: false,
+      transactionTypes: [],
       validationErrors: {
         date: false,
         description: false,
         transactionType: false,
         value: false
       },
-      transactionTypes: [{ description: '1' }, { description: '2' }],
       editingTransaction: null,
       dateMask: '##/##/####',
       transactions: []
@@ -157,7 +157,6 @@ export default {
     transactionTypesSnapshot.forEach((doc) =>
       this.transactionTypes.push(doc.data())
     )
-    console.log(this.transactionTypes)
   },
   methods: {
     ...mapActions({
