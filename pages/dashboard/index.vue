@@ -59,12 +59,7 @@ export default {
       outcome: 0.0,
       essentialExpenses: 0.0,
       personalWhises: 0.0,
-      savings: 0.0,
-      showPassword: false,
-      form: {
-        email: '',
-        password: ''
-      }
+      savings: 0.0
     }
   }
 }
