@@ -42,9 +42,10 @@
               v-model="transaction.transactionType"
               :disabled="transaction.actions.disabled"
               :items="transactionTypes"
+              :item-value="transactionTypes.description"
+              :item-text="transactionTypes.description"
               :menu-props="{ top: true, offsetY: true }"
               :error="validationErrors.transactionType"
-              name="type"
               placeholder=" "
               label="Tipo de transação"
               required
@@ -130,7 +131,8 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
+import { db } from '@/plugins/firebase'
 
 export default {
   data() {
@@ -143,17 +145,19 @@ export default {
         transactionType: false,
         value: false
       },
-      transactionTypes: [
-        'Açougue',
-        'Alimentação',
-        'Aplicação',
-        'Bar/ restaurante',
-        'Supermercado'
-      ],
+      transactionTypes: [{ description: '1' }, { description: '2' }],
       editingTransaction: null,
       dateMask: '##/##/####',
       transactions: []
     }
+  },
+  async mounted() {
+    const transactionTypesRef = db.collection('transactionTypes')
+    const transactionTypesSnapshot = await transactionTypesRef.get()
+    transactionTypesSnapshot.forEach((doc) =>
+      this.transactionTypes.push(doc.data())
+    )
+    console.log(this.transactionTypes)
   },
   methods: {
     ...mapActions({
@@ -246,9 +250,6 @@ export default {
         )
       }
       this.editing = false
-    },
-    computed: {
-      ...mapGetters({ cart: 'cart/getCart' })
     },
     generateUUID() {
       let d = new Date().getTime()
