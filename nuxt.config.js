@@ -53,7 +53,17 @@ export default {
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     // Doc: https://github.com/nuxt-community/dotenv-module
-    '@nuxtjs/dotenv'
+    '@nuxtjs/dotenv',
+    [
+      'vue-currency-filter/nuxt',
+      {
+        symbol: 'R$',
+        thousandsSeparator: '.',
+        fractionCount: 2,
+        fractionSeparator: ',',
+        symbolSpacing: true
+      }
+    ]
   ],
   /*
    ** Axios module configuration
