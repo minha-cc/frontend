@@ -5,7 +5,9 @@
         <v-btn icon text color="primary" large>
           <v-icon>mdi-arrow-left-drop-circle</v-icon>
         </v-btn>
-        <v-btn rounded color="primary" outlined large>02/2020</v-btn>
+        <v-btn rounded color="primary" outlined large>
+          {{ referencePeriod | formatDate }}
+        </v-btn>
         <v-btn icon text color="primary" large>
           <v-icon>mdi-arrow-right-drop-circle</v-icon>
         </v-btn>
@@ -48,12 +50,20 @@
 import Card from '@/components/Cart/Card.vue'
 import Transaction from '@/components/Cart/Transaction.vue'
 import * as Cart from '@/services/cart.js'
+import moment from 'moment'
 
 export default {
   components: {
     Card,
     Transaction
   },
+
+  filters: {
+    formatDate(value) {
+      return moment(value).format('MM/YYYY')
+    }
+  },
+
   data() {
     return {
       cart: {
@@ -62,12 +72,18 @@ export default {
         essential: 0.0,
         whises: 0.0,
         savings: 0.0
-      }
+      },
+      referencePeriod: moment()
     }
   },
+
   async mounted() {
-    const cart = await Cart.get('0ABaP6KUaLYJfImnzGRzXgUblx82', '202005')
+    const cart = await Cart.get(
+      '0ABaP6KUaLYJfImnzGRzXgUblx82',
+      this.referencePeriod.format('YYYYMM')
+    )
     this.cart = cart.cart
+    console.log(this.cart)
   }
 }
 </script>

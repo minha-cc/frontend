@@ -19,7 +19,7 @@ export async function get(accountId, referencePeriod) {
 function createEmptyAccount() {
   return {
     cart: {
-      income: 0.0,
+      income: 11.0,
       outcome: 0.0,
       essential: 0.0,
       whises: 0.0,
