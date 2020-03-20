@@ -3,8 +3,12 @@ import { db } from '@/plugins/firebase'
 export async function get(accountId, referencePeriod) {
   const account = createEmptyAccount()
   const cart = await getCartDocument(accountId, referencePeriod)
-  if (cart.exists) {
-    account.cart = cart.data()
+  if (cart) {
+    account.cart = cart
+    account.transactions = await getTransactionsDocuments(
+      accountId,
+      referencePeriod
+    )
   } else {
     await db
       .collection('accounts')
@@ -28,11 +32,35 @@ function createEmptyAccount() {
   }
 }
 
-function getCartDocument(accountId, referencePeriod) {
-  return db
+async function getCartDocument(accountId, referencePeriod) {
+  const cartDocument = await db
     .collection('accounts')
     .doc(accountId)
     .collection('transactions')
     .doc(referencePeriod)
     .get()
+
+  if (cartDocument.exists) {
+    return cartDocument.data()
+  }
+  return null
+}
+
+async function getTransactionsDocuments(accountId, referencePeriod) {
+  const transactions = []
+  const actions = { disableFields: true }
+  const transactionsDocuments = await db
+    .collection('accounts')
+    .doc(accountId)
+    .collection('transactions')
+    .doc(referencePeriod)
+    .collection('transactions')
+    .get()
+
+  transactionsDocuments.forEach((doc) => {
+    const id = doc.id
+    const data = doc.data()
+    transactions.push({ id, ...data, ...actions })
+  })
+  return transactions
 }

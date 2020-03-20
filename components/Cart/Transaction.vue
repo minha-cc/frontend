@@ -15,7 +15,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.date"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               v-mask="dateMask"
               :error="validationErrors.date"
               name="date"
@@ -28,7 +28,7 @@
           <v-col cols="12" md="4">
             <v-text-field
               v-model="transaction.description"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :error="validationErrors.description"
               name="description"
               label="Descrição"
@@ -40,7 +40,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="transaction.transactionType"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :menu-props="{ top: true, offsetY: true }"
               :error="validationErrors.transactionType"
               :items="transactionTypes"
@@ -55,7 +55,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.value"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :error="validationErrors.value"
               name="value"
               label="Valor"
@@ -66,10 +66,10 @@
             </v-text-field>
           </v-col>
           <v-col class="d-flex justify-center align-center">
-            <template v-if="editing">
+            <template v-if="actions.showSaveGroup">
               <v-btn
                 @click="saveTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
+                :disabled="transaction.disableFields"
                 icon
                 x-small
                 class="ml-1"
@@ -79,7 +79,7 @@
 
               <v-btn
                 @click="cancelTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
+                :disabled="transaction.disableFields"
                 icon
                 x-small
                 class="ml-1"
@@ -90,7 +90,7 @@
             <template v-else>
               <v-btn
                 @click="editTransaction(transaction)"
-                :disabled="transaction.actions.editBtnDisabled"
+                :disabled="actions.disableSaveGroup"
                 icon
                 x-small
               >
@@ -98,7 +98,7 @@
               </v-btn>
               <v-btn
                 @click="removeTransaction(transaction)"
-                :disabled="transaction.actions.deleteBtnDisabled"
+                :disabled="actions.disableSaveGroup"
                 icon
                 x-small
               >
@@ -114,7 +114,7 @@
         <v-fab-transition>
           <v-btn
             @click="createTransaction"
-            :disabled="editing"
+            :disabled="actions.disableNew"
             fab
             color="primary"
             big
@@ -133,12 +133,23 @@
 <script>
 import { mapActions } from 'vuex'
 import { db } from '@/plugins/firebase'
+import { generateUUID } from '@/plugins/uuid'
 
 export default {
+  props: {
+    transactions: {
+      type: Array,
+      default: null
+    }
+  },
+
   data() {
     return {
-      canAdd: true,
-      editing: false,
+      actions: {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      },
       transactionTypes: [],
       validationErrors: {
         date: false,
@@ -147,8 +158,7 @@ export default {
         value: false
       },
       editingTransaction: null,
-      dateMask: '##/##/####',
-      transactions: []
+      dateMask: '##/##/####'
     }
   },
   async mounted() {
@@ -164,20 +174,14 @@ export default {
     }),
     createTransaction() {
       const transaction = {
-        id: this.generateUUID(),
+        id: generateUUID(),
         date: '',
         description: '',
-        value: 0,
+        value: null,
         transactionType: '',
         newTransaction: true,
-        actions: {
-          disabled: false,
-          saveBtnDisabled: false,
-          editBtnDisabled: true,
-          deleteBtnDisabled: true
-        }
+        disableFields: false
       }
-      this.editing = true
       this.editingTransaction = transaction
       this.transactions.unshift(transaction)
       this.validationErrors = {
@@ -186,23 +190,28 @@ export default {
         transactionType: false,
         value: false
       }
+      this.actions = {
+        disableNew: true,
+        showSaveGroup: true,
+        disableSaveGroup: false
+      }
     },
     saveTransaction(selectedTransactionToSave) {
       this.editingTransaction = selectedTransactionToSave
       if (!this.validate()) return
 
-      selectedTransactionToSave.actions = {
-        disabled: true,
-        saveBtnDisabled: true,
-        editBtnDisabled: false,
-        deleteBtnDisabled: false
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
       }
+      selectedTransactionToSave.disableFields = true
+
       this.transactions.map((transaction) =>
         transaction.id === this.editingTransaction.id
           ? { ...this.transactions, ...this.editingTransaction }
           : transaction
       )
-      this.editing = false
       this.updateCart({
         income: this.income + this.editingTransaction.value,
         outcome: 0,
@@ -212,14 +221,13 @@ export default {
       })
     },
     editTransaction(selectedTransactiontoEdit) {
-      this.editing = true
       this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
       this.editingTransaction.newTransaction = false
-      selectedTransactiontoEdit.actions = {
-        disabled: false,
-        saveBtnDisabled: false,
-        editBtnDisabled: true,
-        deleteBtnDisabled: true
+      selectedTransactiontoEdit.disableFields = false
+      this.actions = {
+        disableNew: true,
+        showSaveGroup: true,
+        disableSaveGroup: false
       }
     },
     removeTransaction(selectedTransationToRemove) {
@@ -227,46 +235,26 @@ export default {
         this.transactions.indexOf(selectedTransationToRemove),
         1
       )
-      this.editing = false
     },
     cancelTransaction(selectedTransactionToCancel) {
+      selectedTransactionToCancel.disableFields = true
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      }
       if (selectedTransactionToCancel.newTransaction) {
         this.transactions.splice(
           this.transactions.indexOf(selectedTransactionToCancel),
           1
         )
       } else {
-        this.selectedTransactionToCancel.actions = {
-          disabled: true,
-          saveBtnDisabled: true,
-          editBtnDisabled: false,
-          deleteBtnDisabled: false
-        }
         this.transactions = this.transactions.map((transaction) =>
-          transaction.id === this.selectedTransactionToCancel.id
-            ? this.selectedTransactionToCancel
+          transaction.id === selectedTransactionToCancel.id
+            ? selectedTransactionToCancel
             : transaction
         )
       }
-      this.editing = false
-    },
-    generateUUID() {
-      let d = new Date().getTime()
-      if (
-        typeof performance !== 'undefined' &&
-        typeof performance.now === 'function'
-      ) {
-        d += performance.now()
-      }
-      const newGuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-        /[xy]/g,
-        function(c) {
-          const r = (d + Math.random() * 16) % 16 | 0
-          d = Math.floor(d / 16)
-          return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
-        }
-      )
-      return newGuid
     },
     validate() {
       let valid = true

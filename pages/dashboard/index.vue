@@ -42,7 +42,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <Transaction />
+    <Transaction :transactions="transactions" />
   </v-container>
 </template>
 
@@ -74,6 +74,7 @@ export default {
         whises: 0.0,
         savings: 0.0
       },
+      transactions: [],
       referencePeriod: moment()
     }
   },
@@ -88,6 +89,7 @@ export default {
       this.referencePeriod.format('YYYYMM')
     )
     this.cart = cart.cart
+    this.transactions = cart.transactions
   }
 }
 </script>
