@@ -51,6 +51,7 @@ import Card from '@/components/Cart/Card.vue'
 import Transaction from '@/components/Cart/Transaction.vue'
 import * as Cart from '@/services/cart.js'
 import moment from 'moment'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -77,13 +78,16 @@ export default {
     }
   },
 
+  computed: {
+    ...mapGetters({ currentUser: 'auth/getCurrentUser' })
+  },
+
   async mounted() {
     const cart = await Cart.get(
-      '0ABaP6KUaLYJfImnzGRzXgUblx82',
+      this.currentUser.uid,
       this.referencePeriod.format('YYYYMM')
     )
     this.cart = cart.cart
-    console.log(this.cart)
   }
 }
 </script>
