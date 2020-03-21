@@ -133,7 +133,7 @@
 <script>
 import { mapActions } from 'vuex'
 import { generateUUID } from '@/plugins/uuid'
-import * as Cart from '@/services/firestore/cart.js'
+import * as Transaction from '@/services/firestore/transaction.js'
 
 export default {
   props: {
@@ -206,7 +206,7 @@ export default {
       if (!this.validate()) return
 
       try {
-        await Cart.save(
+        await Transaction.save(
           this.currentUser.uid,
           this.referencePeriod,
           selectedTransactionToSave
@@ -224,10 +224,18 @@ export default {
           personal_wishes: 0,
           savings: 0
         })
+        this.actions = {
+          disableNew: false,
+          showSaveGroup: false,
+          disableSaveGroup: false
+        }
+        selectedTransactionToSave.disableFields = true
       } catch (error) {
+        console.log(error)
         this.$emit('onError', 'Ocorreu um erro ao criar a transação')
       }
     },
+
     editTransaction(selectedTransactiontoEdit) {
       this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
       this.editingTransaction.newTransaction = false

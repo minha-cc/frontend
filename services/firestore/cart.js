@@ -20,16 +20,6 @@ export async function get(accountId, referencePeriod) {
   return account
 }
 
-export async function save(accountId, referencePeriod, transaction) {
-  await db
-    .collection('accounts')
-    .doc(accountId)
-    .collection('transactions')
-    .doc(referencePeriod)
-    .collection('transactions')
-    .add({ ...transaction })
-}
-
 function createEmptyAccount() {
   return {
     cart: {
