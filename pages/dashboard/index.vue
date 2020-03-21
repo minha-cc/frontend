@@ -42,7 +42,10 @@
         </v-col>
       </v-row>
     </v-card>
-    <Transaction :transactions="transactions" />
+    <Transaction
+      :transactions="transactions"
+      :transactionTypes="transactionTypes"
+    />
   </v-container>
 </template>
 
@@ -50,6 +53,7 @@
 import Card from '@/components/Cart/Card.vue'
 import Transaction from '@/components/Cart/Transaction.vue'
 import * as Cart from '@/services/cart.js'
+import * as TransactionType from '@/services/transactionType.js'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 
@@ -75,6 +79,7 @@ export default {
         savings: 0.0
       },
       transactions: [],
+      transactionTypes: [],
       referencePeriod: moment()
     }
   },
@@ -90,6 +95,7 @@ export default {
     )
     this.cart = cart.cart
     this.transactions = cart.transactions
+    this.transactionTypes = await TransactionType.get()
   }
 }
 </script>

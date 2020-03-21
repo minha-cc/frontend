@@ -132,12 +132,15 @@
 
 <script>
 import { mapActions } from 'vuex'
-import { db } from '@/plugins/firebase'
 import { generateUUID } from '@/plugins/uuid'
 
 export default {
   props: {
     transactions: {
+      type: Array,
+      default: null
+    },
+    transactionTypes: {
       type: Array,
       default: null
     }
@@ -150,7 +153,6 @@ export default {
         showSaveGroup: false,
         disableSaveGroup: false
       },
-      transactionTypes: [],
       validationErrors: {
         date: false,
         description: false,
@@ -160,13 +162,6 @@ export default {
       editingTransaction: null,
       dateMask: '##/##/####'
     }
-  },
-  async mounted() {
-    const transactionTypesRef = db.collection('transactionTypes')
-    const transactionTypesSnapshot = await transactionTypesRef.get()
-    transactionTypesSnapshot.forEach((doc) =>
-      this.transactionTypes.push(doc.data())
-    )
   },
   methods: {
     ...mapActions({
