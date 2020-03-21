@@ -6,7 +6,7 @@
           <v-icon>mdi-arrow-left-drop-circle</v-icon>
         </v-btn>
         <v-btn rounded color="primary" outlined large>
-          {{ referencePeriod | formatDate }}
+          {{ referencePeriod | formatDate('MM/YYYY') }}
         </v-btn>
         <v-btn icon text color="primary" large>
           <v-icon>mdi-arrow-right-drop-circle</v-icon>
@@ -45,6 +45,8 @@
     <Transaction
       :transactions="transactions"
       :transactionTypes="transactionTypes"
+      :referencePeriod="referencePeriod | formatDate('YYYYMM')"
+      :currentUser="currentUser"
     />
   </v-container>
 </template>
@@ -52,8 +54,8 @@
 <script>
 import Card from '@/components/Cart/Card.vue'
 import Transaction from '@/components/Cart/Transaction.vue'
-import * as Cart from '@/services/cart.js'
-import * as TransactionType from '@/services/transactionType.js'
+import * as Cart from '@/services/firestore/cart.js'
+import * as TransactionType from '@/services/firestore/transactionType.js'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 
@@ -64,8 +66,8 @@ export default {
   },
 
   filters: {
-    formatDate(value) {
-      return moment(value).format('MM/YYYY')
+    formatDate(value, format) {
+      return moment(value).format(format)
     }
   },
 
@@ -89,13 +91,13 @@ export default {
   },
 
   async mounted() {
+    this.transactionTypes = await TransactionType.get()
     const cart = await Cart.get(
       this.currentUser.uid,
       this.referencePeriod.format('YYYYMM')
     )
     this.cart = cart.cart
     this.transactions = cart.transactions
-    this.transactionTypes = await TransactionType.get()
   }
 }
 </script>

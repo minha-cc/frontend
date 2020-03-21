@@ -133,6 +133,7 @@
 <script>
 import { mapActions } from 'vuex'
 import { generateUUID } from '@/plugins/uuid'
+import * as Cart from '@/services/firestore/cart.js'
 
 export default {
   props: {
@@ -142,6 +143,14 @@ export default {
     },
     transactionTypes: {
       type: Array,
+      default: null
+    },
+    currentUser: {
+      type: Object,
+      default: null
+    },
+    referencePeriod: {
+      type: String,
       default: null
     }
   },
@@ -191,29 +200,33 @@ export default {
         disableSaveGroup: false
       }
     },
-    saveTransaction(selectedTransactionToSave) {
+
+    async saveTransaction(selectedTransactionToSave) {
       this.editingTransaction = selectedTransactionToSave
       if (!this.validate()) return
 
-      this.actions = {
-        disableNew: false,
-        showSaveGroup: false,
-        disableSaveGroup: false
-      }
-      selectedTransactionToSave.disableFields = true
+      try {
+        await Cart.save(
+          this.currentUser.uid,
+          this.referencePeriod,
+          selectedTransactionToSave
+        )
 
-      this.transactions.map((transaction) =>
-        transaction.id === this.editingTransaction.id
-          ? { ...this.transactions, ...this.editingTransaction }
-          : transaction
-      )
-      this.updateCart({
-        income: this.income + this.editingTransaction.value,
-        outcome: 0,
-        essential_expenses: 0,
-        personal_wishes: 0,
-        savings: 0
-      })
+        this.transactions.map((transaction) =>
+          transaction.id === this.editingTransaction.id
+            ? { ...this.transactions, ...this.editingTransaction }
+            : transaction
+        )
+        this.updateCart({
+          income: this.income + this.editingTransaction.value,
+          outcome: 0,
+          essential_expenses: 0,
+          personal_wishes: 0,
+          savings: 0
+        })
+      } catch (error) {
+        this.$emit('onError', 'Ocorreu um erro ao criar a transação')
+      }
     },
     editTransaction(selectedTransactiontoEdit) {
       this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
