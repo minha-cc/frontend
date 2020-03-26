@@ -64,12 +64,12 @@ export default {
 
   mounted() {
     this.getCart()
+    this.listeningCart()
   },
 
   methods: {
     async getCart() {
       this.cart = await Cart.get(this.currentUser.uid, this.referencePeriod)
-      this.listeningCart()
     },
 
     listeningCart() {
