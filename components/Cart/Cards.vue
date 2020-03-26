@@ -56,13 +56,23 @@ export default {
     ...mapGetters({ currentUser: 'auth/getCurrentUser' })
   },
 
-  async mounted() {
-    this.cart = await Cart.get(this.currentUser.uid, this.referencePeriod)
-    this.ListeningCart()
+  watch: {
+    referencePeriod(newValue) {
+      this.getCart()
+    }
+  },
+
+  mounted() {
+    this.getCart()
   },
 
   methods: {
-    ListeningCart() {
+    async getCart() {
+      this.cart = await Cart.get(this.currentUser.uid, this.referencePeriod)
+      this.listeningCart()
+    },
+
+    listeningCart() {
       Cart.cartReference(this.currentUser.uid, this.referencePeriod).onSnapshot(
         (doc) => {
           this.cart = doc.data()

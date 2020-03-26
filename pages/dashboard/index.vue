@@ -2,13 +2,13 @@
   <v-container>
     <v-card outlined>
       <v-row justify="center" class="mt-2">
-        <v-btn icon text color="primary" large>
+        <v-btn @click="previousMonth" text color="primary" large>
           <v-icon>mdi-arrow-left-drop-circle</v-icon>
         </v-btn>
         <v-btn rounded color="primary" outlined large>
           {{ referencePeriod | formatDate('MM/YYYY') }}
         </v-btn>
-        <v-btn icon text color="primary" large>
+        <v-btn @click="nextMonth" text color="primary" large>
           <v-icon>mdi-arrow-right-drop-circle</v-icon>
         </v-btn>
       </v-row>
@@ -57,6 +57,17 @@ export default {
 
   async mounted() {
     this.transactionTypes = await TransactionType.get()
+  },
+
+  methods: {
+    previousMonth() {
+      this.referencePeriod.subtract(1, 'M')
+      this.$forceUpdate()
+    },
+    nextMonth() {
+      this.referencePeriod.add(1, 'M')
+      this.$forceUpdate()
+    }
   }
 }
 </script>
