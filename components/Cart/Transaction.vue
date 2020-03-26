@@ -231,7 +231,6 @@ export default {
         }
         selectedTransactionToSave.disableFields = true
       } catch (error) {
-        console.log(error)
         this.$emit('onError', 'Ocorreu um erro ao criar a transação')
       }
     },

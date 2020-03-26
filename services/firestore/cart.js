@@ -1,67 +1,39 @@
 import { db } from '@/plugins/firebase'
 
-export async function get(accountId, referencePeriod) {
-  const account = createEmptyAccount()
-  const cart = await getCartDocument(accountId, referencePeriod)
-  if (cart) {
-    account.cart = cart
-    account.transactions = await getTransactionsDocuments(
-      accountId,
-      referencePeriod
-    )
-  } else {
-    await db
-      .collection('accounts')
-      .doc(accountId)
-      .collection('transactions')
-      .doc(referencePeriod)
-      .set(account)
-  }
-  return account
-}
-
-function createEmptyAccount() {
-  return {
-    cart: {
-      income: 11.0,
-      outcome: 0.0,
-      essential: 0.0,
-      whises: 0.0,
-      savings: 0.0
-    }
-  }
-}
-
-async function getCartDocument(accountId, referencePeriod) {
-  const cartDocument = await db
+export const cartReference = (accountId, referencePeriod) => {
+  return db
     .collection('accounts')
     .doc(accountId)
-    .collection('transactions')
+    .collection('cart')
     .doc(referencePeriod)
-    .get()
+}
+
+export async function get(accountId, referencePeriod) {
+  const cart = await cartDocument(accountId, referencePeriod)
+  if (cart) {
+    return cart
+  }
+
+  const emptyCart = createEmptyCart()
+  await cartReference(accountId, referencePeriod).set(emptyCart)
+  return emptyCart
+}
+
+export function createEmptyCart() {
+  return {
+    income: 0.0,
+    outcome: 0.0,
+    essential: 0.0,
+    whises: 0.0,
+    savings: 0.0
+  }
+}
+
+async function cartDocument(accountId, referencePeriod) {
+  const cartDocument = await cartReference(accountId, referencePeriod).get()
 
   if (cartDocument.exists) {
     return cartDocument.data()
   }
   return null
-}
-
-async function getTransactionsDocuments(accountId, referencePeriod) {
-  const transactions = []
-  const actions = { disableFields: true }
-  const transactionsDocuments = await db
-    .collection('accounts')
-    .doc(accountId)
-    .collection('transactions')
-    .doc(referencePeriod)
-    .collection('transactions')
-    .orderBy('date', 'desc')
-    .get()
-
-  transactionsDocuments.forEach((doc) => {
-    const id = doc.id
-    const data = doc.data()
-    transactions.push({ id, ...data, ...actions })
-  })
-  return transactions
 }
