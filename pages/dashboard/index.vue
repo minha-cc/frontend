@@ -15,26 +15,19 @@
       <v-divider class="mt-2" />
       <Cards :referencePeriod="referencePeriod | formatDate('YYYYMM')" />
     </v-card>
-    <Transaction
-      :transactions="transactions"
-      :transactionTypes="transactionTypes"
-      :referencePeriod="referencePeriod | formatDate('YYYYMM')"
-      :currentUser="currentUser"
-    />
+    <Transactions :referencePeriod="referencePeriod | formatDate('YYYYMM')" />
   </v-container>
 </template>
 
 <script>
 import Cards from '@/components/Cart/Cards.vue'
-import Transaction from '@/components/Cart/Transaction.vue'
-import * as TransactionType from '@/services/firestore/transactionType.js'
+import Transactions from '@/components/Cart/Transactions.vue'
 import moment from 'moment'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {
     Cards,
-    Transaction
+    Transactions
   },
 
   filters: {
@@ -49,14 +42,6 @@ export default {
       transactionTypes: [],
       referencePeriod: moment()
     }
-  },
-
-  computed: {
-    ...mapGetters({ currentUser: 'auth/getCurrentUser' })
-  },
-
-  async mounted() {
-    this.transactionTypes = await TransactionType.get()
   },
 
   methods: {

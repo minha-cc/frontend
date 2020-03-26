@@ -131,24 +131,12 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import { generateUUID } from '@/plugins/uuid'
+import * as TransactionType from '@/services/firestore/transactionType.js'
 import * as Transaction from '@/services/firestore/transaction.js'
+import { mapGetters } from 'vuex'
 
 export default {
   props: {
-    transactions: {
-      type: Array,
-      default: null
-    },
-    transactionTypes: {
-      type: Array,
-      default: null
-    },
-    currentUser: {
-      type: Object,
-      default: null
-    },
     referencePeriod: {
       type: String,
       default: null
@@ -157,6 +145,8 @@ export default {
 
   data() {
     return {
+      transactions: [],
+      transactionTypes: [],
       actions: {
         disableNew: false,
         showSaveGroup: false,
@@ -172,22 +162,23 @@ export default {
       dateMask: '##/##/####'
     }
   },
+
+  computed: {
+    ...mapGetters({ currentUser: 'auth/getCurrentUser' })
+  },
+
+  mounted() {
+    this.getTransactionTypes()
+    this.listeningTransactions()
+  },
+
   methods: {
-    ...mapActions({
-      updateCart: 'cart/updateCart'
-    }),
     createTransaction() {
-      const transaction = {
-        id: generateUUID(),
-        date: '',
-        description: '',
-        value: null,
-        transactionType: '',
-        newTransaction: true,
-        disableFields: false
-      }
+      const transaction = Transaction.createEmpty(
+        this.currentUser.uid,
+        this.referencePeriod
+      )
       this.editingTransaction = transaction
-      this.transactions.unshift(transaction)
       this.validationErrors = {
         date: false,
         description: false,
@@ -201,95 +192,23 @@ export default {
       }
     },
 
-    async saveTransaction(selectedTransactionToSave) {
-      this.editingTransaction = selectedTransactionToSave
-      if (!this.validate()) return
+    async getTransactionTypes() {
+      this.transactionTypes = await TransactionType.get()
+    },
 
-      try {
-        await Transaction.save(
-          this.currentUser.uid,
-          this.referencePeriod,
-          selectedTransactionToSave
-        )
-
-        this.transactions.map((transaction) =>
-          transaction.id === this.editingTransaction.id
-            ? { ...this.transactions, ...this.editingTransaction }
-            : transaction
-        )
-        this.updateCart({
-          income: this.income + this.editingTransaction.value,
-          outcome: 0,
-          essential_expenses: 0,
-          personal_wishes: 0,
-          savings: 0
+    listeningTransactions() {
+      Transaction.transactionReference(
+        this.currentUser.uid,
+        this.referencePeriod
+      ).onSnapshot((snaphost) => {
+        snaphost.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const data = change.doc.data()
+            data.id = change.doc.id
+            this.transactions.unshift(data)
+          }
         })
-        this.actions = {
-          disableNew: false,
-          showSaveGroup: false,
-          disableSaveGroup: false
-        }
-        selectedTransactionToSave.disableFields = true
-      } catch (error) {
-        this.$emit('onError', 'Ocorreu um erro ao criar a transação')
-      }
-    },
-
-    editTransaction(selectedTransactiontoEdit) {
-      this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
-      this.editingTransaction.newTransaction = false
-      selectedTransactiontoEdit.disableFields = false
-      this.actions = {
-        disableNew: true,
-        showSaveGroup: true,
-        disableSaveGroup: false
-      }
-    },
-    removeTransaction(selectedTransationToRemove) {
-      this.transactions.splice(
-        this.transactions.indexOf(selectedTransationToRemove),
-        1
-      )
-    },
-    cancelTransaction(selectedTransactionToCancel) {
-      selectedTransactionToCancel.disableFields = true
-      this.actions = {
-        disableNew: false,
-        showSaveGroup: false,
-        disableSaveGroup: false
-      }
-      if (selectedTransactionToCancel.newTransaction) {
-        this.transactions.splice(
-          this.transactions.indexOf(selectedTransactionToCancel),
-          1
-        )
-      } else {
-        this.transactions = this.transactions.map((transaction) =>
-          transaction.id === selectedTransactionToCancel.id
-            ? selectedTransactionToCancel
-            : transaction
-        )
-      }
-    },
-    validate() {
-      let valid = true
-      if (this.editingTransaction.date === '') {
-        this.validationErrors.date = true
-        valid = false
-      }
-      if (this.editingTransaction.description === '') {
-        this.validationErrors.description = true
-        valid = false
-      }
-      if (this.editingTransaction.transactionType === '') {
-        this.validationErrors.transactionType = true
-        valid = false
-      }
-      if (this.editingTransaction.value === '') {
-        this.validationErrors.value = true
-        valid = false
-      }
-      return valid
+      })
     }
   }
 }
