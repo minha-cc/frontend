@@ -58,7 +58,7 @@ export default {
 
   watch: {
     referencePeriod(newValue) {
-      this.getCart()
+      this.listeningCart()
     }
   },
 

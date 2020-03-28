@@ -167,6 +167,13 @@ export default {
     ...mapGetters({ currentUser: 'auth/getCurrentUser' })
   },
 
+  watch: {
+    referencePeriod(newValue) {
+      this.transactions = []
+      this.listeningTransactions()
+    }
+  },
+
   mounted() {
     this.getTransactionTypes()
     this.listeningTransactions()
@@ -202,10 +209,21 @@ export default {
         this.referencePeriod
       ).onSnapshot((snaphost) => {
         snaphost.docChanges().forEach((change) => {
+          const data = change.doc.data()
+          data.id = change.doc.id
           if (change.type === 'added') {
-            const data = change.doc.data()
-            data.id = change.doc.id
             this.transactions.unshift(data)
+          }
+          if (change.type === 'removed') {
+            this.transactions.splice(
+              this.transactions.findIndex((obj) => obj.id === data.id),
+              1
+            )
+          }
+          if (change.type === 'modified') {
+            this.transactions = this.transactions.map((obj) =>
+              obj.id === data.id ? { ...data } : { ...obj }
+            )
           }
         })
       })
