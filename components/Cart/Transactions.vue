@@ -181,7 +181,7 @@ export default {
 
   methods: {
     createTransaction() {
-      const transaction = Transaction.createEmpty(
+      const transaction = Transaction.empty(
         this.currentUser.uid,
         this.referencePeriod
       )
@@ -192,6 +192,70 @@ export default {
         transactionType: false,
         value: false
       }
+      this.actions = {
+        disableNew: true,
+        showSaveGroup: true,
+        disableSaveGroup: false
+      }
+    },
+
+    async saveTransaction(transaction) {
+      this.editingTransaction = transaction
+      if (!this.validate()) return
+
+      try {
+        this.editingTransaction.disableFields = true
+        this.editingTransaction.newTransaction = false
+        await Transaction.save(
+          this.currentUser.uid,
+          this.referencePeriod,
+          this.editingTransaction
+        )
+        this.actions = {
+          disableNew: false,
+          showSaveGroup: false,
+          disableSaveGroup: false
+        }
+      } catch (error) {
+        console.log(error)
+        this.$emit('onError', 'Ocorreu um erro ao criar a transação')
+      }
+    },
+
+    async cancelTransaction(transaction) {
+      console.log(transaction)
+      if (transaction.newTransaction) {
+        await this.removeTransaction(transaction)
+      }
+      transaction.disableFields = true
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      }
+    },
+
+    async removeTransaction(transaction) {
+      try {
+        await Transaction.remove(
+          this.currentUser.uid,
+          this.referencePeriod,
+          transaction
+        )
+      } catch (error) {
+        console.log(error)
+        this.$emit('onError', 'Ocorreu um erro ao remover a transação')
+      }
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      }
+    },
+
+    editTransaction(transaction) {
+      this.editingTransaction = transaction
+      this.editingTransaction.disableFields = false
       this.actions = {
         disableNew: true,
         showSaveGroup: true,
@@ -227,6 +291,27 @@ export default {
           }
         })
       })
+    },
+
+    validate() {
+      let valid = true
+      if (this.editingTransaction.date === '') {
+        this.validationErrors.date = true
+        valid = false
+      }
+      if (this.editingTransaction.description === '') {
+        this.validationErrors.description = true
+        valid = false
+      }
+      if (this.editingTransaction.transactionType === '') {
+        this.validationErrors.transactionType = true
+        valid = false
+      }
+      if (this.editingTransaction.value === '') {
+        this.validationErrors.value = true
+        valid = false
+      }
+      return valid
     }
   }
 }
