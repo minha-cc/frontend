@@ -1,4 +1,4 @@
-import { uuid } from '@/plugins/uuid'
+import { generateUUID } from '@/plugins/uuid'
 import { firebaseAuth, db } from '@/plugins/firebase'
 
 export const state = () => ({
@@ -28,7 +28,7 @@ export const actions = {
   },
   async signupAsync(context, userInfo) {
     try {
-      const accountId = uuid()
+      const accountId = generateUUID()
       await firebaseAuth.createUserWithEmailAndPassword(
         userInfo.email,
         userInfo.password

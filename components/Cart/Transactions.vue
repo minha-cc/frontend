@@ -15,7 +15,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.date"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               v-mask="dateMask"
               :error="validationErrors.date"
               name="date"
@@ -28,7 +28,7 @@
           <v-col cols="12" md="4">
             <v-text-field
               v-model="transaction.description"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :error="validationErrors.description"
               name="description"
               label="Descrição"
@@ -40,7 +40,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="transaction.transactionType"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :menu-props="{ top: true, offsetY: true }"
               :error="validationErrors.transactionType"
               :items="transactionTypes"
@@ -55,7 +55,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.value"
-              :disabled="transaction.actions.disabled"
+              :disabled="transaction.disableFields"
               :error="validationErrors.value"
               name="value"
               label="Valor"
@@ -66,10 +66,10 @@
             </v-text-field>
           </v-col>
           <v-col class="d-flex justify-center align-center">
-            <template v-if="editing">
+            <template v-if="actions.showSaveGroup">
               <v-btn
                 @click="saveTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
+                :disabled="transaction.disableFields"
                 icon
                 x-small
                 class="ml-1"
@@ -79,7 +79,7 @@
 
               <v-btn
                 @click="cancelTransaction(transaction)"
-                :disabled="transaction.actions.saveBtnDisabled"
+                :disabled="transaction.disableFields"
                 icon
                 x-small
                 class="ml-1"
@@ -90,7 +90,7 @@
             <template v-else>
               <v-btn
                 @click="editTransaction(transaction)"
-                :disabled="transaction.actions.editBtnDisabled"
+                :disabled="actions.disableSaveGroup"
                 icon
                 x-small
               >
@@ -98,7 +98,7 @@
               </v-btn>
               <v-btn
                 @click="removeTransaction(transaction)"
-                :disabled="transaction.actions.deleteBtnDisabled"
+                :disabled="actions.disableSaveGroup"
                 icon
                 x-small
               >
@@ -114,7 +114,7 @@
         <v-fab-transition>
           <v-btn
             @click="createTransaction"
-            :disabled="editing"
+            :disabled="actions.disableNew"
             fab
             color="primary"
             big
@@ -131,15 +131,27 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import { db } from '@/plugins/firebase'
+import * as TransactionType from '@/services/firestore/transactionType.js'
+import * as Transaction from '@/services/firestore/transaction.js'
+import { mapGetters } from 'vuex'
 
 export default {
+  props: {
+    referencePeriod: {
+      type: String,
+      default: null
+    }
+  },
+
   data() {
     return {
-      canAdd: true,
-      editing: false,
+      transactions: [],
       transactionTypes: [],
+      actions: {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      },
       validationErrors: {
         date: false,
         description: false,
@@ -147,127 +159,140 @@ export default {
         value: false
       },
       editingTransaction: null,
-      dateMask: '##/##/####',
-      transactions: []
+      dateMask: '##/##/####'
     }
   },
-  async mounted() {
-    const transactionTypesRef = db.collection('transactionTypes')
-    const transactionTypesSnapshot = await transactionTypesRef.get()
-    transactionTypesSnapshot.forEach((doc) =>
-      this.transactionTypes.push(doc.data())
-    )
+
+  computed: {
+    ...mapGetters({ currentUser: 'auth/getCurrentUser' })
   },
+
+  watch: {
+    referencePeriod(newValue) {
+      this.transactions = []
+      this.listeningTransactions()
+    }
+  },
+
+  mounted() {
+    this.getTransactionTypes()
+    this.listeningTransactions()
+  },
+
   methods: {
-    ...mapActions({
-      updateCart: 'cart/updateCart'
-    }),
     createTransaction() {
-      const transaction = {
-        id: this.generateUUID(),
-        date: '',
-        description: '',
-        value: 0,
-        transactionType: '',
-        newTransaction: true,
-        actions: {
-          disabled: false,
-          saveBtnDisabled: false,
-          editBtnDisabled: true,
-          deleteBtnDisabled: true
-        }
-      }
-      this.editing = true
+      const transaction = Transaction.empty(
+        this.currentUser.uid,
+        this.referencePeriod
+      )
       this.editingTransaction = transaction
-      this.transactions.unshift(transaction)
       this.validationErrors = {
         date: false,
         description: false,
         transactionType: false,
         value: false
       }
+      this.actions = {
+        disableNew: true,
+        showSaveGroup: true,
+        disableSaveGroup: false
+      }
     },
-    saveTransaction(selectedTransactionToSave) {
-      this.editingTransaction = selectedTransactionToSave
+
+    async saveTransaction(transaction) {
+      this.editingTransaction = transaction
       if (!this.validate()) return
 
-      selectedTransactionToSave.actions = {
-        disabled: true,
-        saveBtnDisabled: true,
-        editBtnDisabled: false,
-        deleteBtnDisabled: false
+      try {
+        this.editingTransaction.disableFields = true
+        this.editingTransaction.newTransaction = false
+        await Transaction.save(
+          this.currentUser.uid,
+          this.referencePeriod,
+          this.editingTransaction
+        )
+        this.actions = {
+          disableNew: false,
+          showSaveGroup: false,
+          disableSaveGroup: false
+        }
+      } catch (error) {
+        console.log(error)
+        this.$emit('onError', 'Ocorreu um erro ao criar a transação')
       }
-      this.transactions.map((transaction) =>
-        transaction.id === this.editingTransaction.id
-          ? { ...this.transactions, ...this.editingTransaction }
-          : transaction
-      )
-      this.editing = false
-      this.updateCart({
-        income: this.income + this.editingTransaction.value,
-        outcome: 0,
-        essential_expenses: 0,
-        personal_wishes: 0,
-        savings: 0
+    },
+
+    async cancelTransaction(transaction) {
+      console.log(transaction)
+      if (transaction.newTransaction) {
+        await this.removeTransaction(transaction)
+      }
+      transaction.disableFields = true
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      }
+    },
+
+    async removeTransaction(transaction) {
+      try {
+        await Transaction.remove(
+          this.currentUser.uid,
+          this.referencePeriod,
+          transaction
+        )
+      } catch (error) {
+        console.log(error)
+        this.$emit('onError', 'Ocorreu um erro ao remover a transação')
+      }
+      this.actions = {
+        disableNew: false,
+        showSaveGroup: false,
+        disableSaveGroup: false
+      }
+    },
+
+    editTransaction(transaction) {
+      this.editingTransaction = transaction
+      this.editingTransaction.disableFields = false
+      this.actions = {
+        disableNew: true,
+        showSaveGroup: true,
+        disableSaveGroup: false
+      }
+    },
+
+    async getTransactionTypes() {
+      this.transactionTypes = await TransactionType.get()
+    },
+
+    listeningTransactions() {
+      Transaction.transactionReference(
+        this.currentUser.uid,
+        this.referencePeriod
+      ).onSnapshot((snaphost) => {
+        snaphost.docChanges().forEach((change) => {
+          const data = change.doc.data()
+          data.id = change.doc.id
+          if (change.type === 'added') {
+            this.transactions.unshift(data)
+          }
+          if (change.type === 'removed') {
+            this.transactions.splice(
+              this.transactions.findIndex((obj) => obj.id === data.id),
+              1
+            )
+          }
+          if (change.type === 'modified') {
+            this.transactions = this.transactions.map((obj) =>
+              obj.id === data.id ? { ...data } : { ...obj }
+            )
+          }
+        })
       })
     },
-    editTransaction(selectedTransactiontoEdit) {
-      this.editing = true
-      this.editingTransaction = Object.assign({}, selectedTransactiontoEdit)
-      this.editingTransaction.newTransaction = false
-      selectedTransactiontoEdit.actions = {
-        disabled: false,
-        saveBtnDisabled: false,
-        editBtnDisabled: true,
-        deleteBtnDisabled: true
-      }
-    },
-    removeTransaction(selectedTransationToRemove) {
-      this.transactions.splice(
-        this.transactions.indexOf(selectedTransationToRemove),
-        1
-      )
-      this.editing = false
-    },
-    cancelTransaction(selectedTransactionToCancel) {
-      if (selectedTransactionToCancel.newTransaction) {
-        this.transactions.splice(
-          this.transactions.indexOf(selectedTransactionToCancel),
-          1
-        )
-      } else {
-        this.selectedTransactionToCancel.actions = {
-          disabled: true,
-          saveBtnDisabled: true,
-          editBtnDisabled: false,
-          deleteBtnDisabled: false
-        }
-        this.transactions = this.transactions.map((transaction) =>
-          transaction.id === this.selectedTransactionToCancel.id
-            ? this.selectedTransactionToCancel
-            : transaction
-        )
-      }
-      this.editing = false
-    },
-    generateUUID() {
-      let d = new Date().getTime()
-      if (
-        typeof performance !== 'undefined' &&
-        typeof performance.now === 'function'
-      ) {
-        d += performance.now()
-      }
-      const newGuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-        /[xy]/g,
-        function(c) {
-          const r = (d + Math.random() * 16) % 16 | 0
-          d = Math.floor(d / 16)
-          return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
-        }
-      )
-      return newGuid
-    },
+
     validate() {
       let valid = true
       if (this.editingTransaction.date === '') {
