@@ -45,7 +45,7 @@
               :error="validationErrors.transactionType"
               :items="transactionTypes"
               item-text="description"
-              item-value="description"
+              item-value="id"
               placeholder=" "
               label="Tipo de transação"
               required
@@ -217,13 +217,11 @@ export default {
           disableSaveGroup: false
         }
       } catch (error) {
-        console.log(error)
         this.$emit('onError', 'Ocorreu um erro ao criar a transação')
       }
     },
 
     async cancelTransaction(transaction) {
-      console.log(transaction)
       if (transaction.newTransaction) {
         await this.removeTransaction(transaction)
       }
@@ -265,6 +263,7 @@ export default {
 
     async getTransactionTypes() {
       this.transactionTypes = await TransactionType.get()
+      console.log(this.transactionTypes)
     },
 
     listeningTransactions() {
