@@ -45,7 +45,7 @@
               :error="validationErrors.transactionType"
               :items="transactionTypes"
               item-text="description"
-              item-value="description"
+              item-value="id"
               placeholder=" "
               label="Tipo de transação"
               required
@@ -132,7 +132,8 @@
 
 <script>
 import * as TransactionType from '@/services/firestore/transactionType.js'
-import * as Transaction from '@/services/firestore/transaction.js'
+import * as Transactions from '@/services/firestore/transaction.js'
+import { functions } from '@/plugins/firebase.js'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -180,12 +181,12 @@ export default {
   },
 
   methods: {
-    createTransaction() {
-      const transaction = Transaction.empty(
-        this.currentUser.uid,
-        this.referencePeriod
+    async createTransaction() {
+      const data = { referencePeriod: this.referencePeriod }
+      const createEmptyTransaction = functions.httpsCallable(
+        'createEmptyTransaction'
       )
-      this.editingTransaction = transaction
+      this.editingTransaction = await createEmptyTransaction(data)
       this.validationErrors = {
         date: false,
         description: false,
@@ -206,24 +207,24 @@ export default {
       try {
         this.editingTransaction.disableFields = true
         this.editingTransaction.newTransaction = false
-        await Transaction.save(
-          this.currentUser.uid,
-          this.referencePeriod,
-          this.editingTransaction
-        )
+
+        const data = {
+          referencePeriod: this.referencePeriod,
+          transaction: this.editingTransaction
+        }
+        const saveTransaction = functions.httpsCallable('saveTransaction')
+        await saveTransaction(data)
         this.actions = {
           disableNew: false,
           showSaveGroup: false,
           disableSaveGroup: false
         }
       } catch (error) {
-        console.log(error)
         this.$emit('onError', 'Ocorreu um erro ao criar a transação')
       }
     },
 
     async cancelTransaction(transaction) {
-      console.log(transaction)
       if (transaction.newTransaction) {
         await this.removeTransaction(transaction)
       }
@@ -237,13 +238,13 @@ export default {
 
     async removeTransaction(transaction) {
       try {
-        await Transaction.remove(
-          this.currentUser.uid,
-          this.referencePeriod,
-          transaction
-        )
+        const data = {
+          referencePeriod: this.referencePeriod,
+          transaction: this.editingTransaction
+        }
+        const removeTransaction = functions.httpsCallable('removeTransaction')
+        await removeTransaction(data)
       } catch (error) {
-        console.log(error)
         this.$emit('onError', 'Ocorreu um erro ao remover a transação')
       }
       this.actions = {
@@ -268,7 +269,7 @@ export default {
     },
 
     listeningTransactions() {
-      Transaction.transactionReference(
+      Transactions.transactionReference(
         this.currentUser.uid,
         this.referencePeriod
       ).onSnapshot((snaphost) => {
