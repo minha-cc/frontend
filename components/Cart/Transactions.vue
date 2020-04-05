@@ -133,6 +133,7 @@
 <script>
 import * as TransactionType from '@/services/firestore/transactionType.js'
 import * as Transaction from '@/services/firestore/transaction.js'
+import { functions } from '@/plugins/firebase.js'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -181,11 +182,13 @@ export default {
 
   methods: {
     createTransaction() {
-      const transaction = Transaction.empty(
-        this.currentUser.uid,
-        this.referencePeriod
+      const data = { referencePeriod: this.referencePeriod }
+      const createEmptyTransaction = functions.httpsCallable(
+        'createEmptyTransaction'
       )
-      this.editingTransaction = transaction
+      createEmptyTransaction(data).then(
+        (result) => (this.editingTransaction = result)
+      )
       this.validationErrors = {
         date: false,
         description: false,
