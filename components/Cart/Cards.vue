@@ -47,7 +47,7 @@ export default {
 
   data() {
     return {
-      cart: Cart.createEmptyCart(),
+      cart: this.emptyCart(),
       changedCard: null
     }
   },
@@ -63,21 +63,31 @@ export default {
   },
 
   mounted() {
-    this.getCart()
     this.listeningCart()
   },
 
   methods: {
-    async getCart() {
-      this.cart = await Cart.get(this.currentUser.uid, this.referencePeriod)
-    },
-
     listeningCart() {
       Cart.cartReference(this.currentUser.uid, this.referencePeriod).onSnapshot(
         (doc) => {
           this.cart = doc.data()
+          if (doc.data() === undefined) {
+            this.cart = this.emptyCart()
+          } else {
+            this.cart = doc.data()
+          }
         }
       )
+    },
+
+    emptyCart() {
+      return {
+        income: 0.0,
+        outcome: 0.0,
+        essential: 0.0,
+        whises: 0.0,
+        savings: 0.0
+      }
     }
   }
 }
