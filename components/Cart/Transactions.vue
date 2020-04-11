@@ -265,7 +265,7 @@ export default {
     },
 
     async getTransactionTypes() {
-      this.transactionTypes = await TransactionType.get()
+      this.transactionTypes = await TransactionType.get(this.currentUser.uid)
     },
 
     listeningTransactions() {
