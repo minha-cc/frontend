@@ -206,9 +206,9 @@ export default {
     },
 
     async saveTransaction(transaction) {
+      this.editingTransaction = transaction
       if (!this.validate()) return
 
-      this.editingTransaction = transaction
       this.editingTransaction.actions.saving = true
 
       try {
