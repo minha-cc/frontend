@@ -15,7 +15,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.date"
-              :disabled="transaction.disableFields"
+              :disabled="transaction.actions.disableFields"
               v-mask="dateMask"
               :error="validationErrors.date"
               name="date"
@@ -28,7 +28,7 @@
           <v-col cols="12" md="4">
             <v-text-field
               v-model="transaction.description"
-              :disabled="transaction.disableFields"
+              :disabled="transaction.actions.disableFields"
               :error="validationErrors.description"
               name="description"
               label="Descrição"
@@ -40,7 +40,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="transaction.transactionTypeId"
-              :disabled="transaction.disableFields"
+              :disabled="transaction.actions.disableFields"
               :menu-props="{ top: true, offsetY: true }"
               :error="validationErrors.transactionTypeId"
               :items="transactionTypes"
@@ -55,7 +55,7 @@
           <v-col cols="12" md="2">
             <v-text-field
               v-model="transaction.value"
-              :disabled="transaction.disableFields"
+              :disabled="transaction.actions.disableFields"
               :error="validationErrors.value"
               name="value"
               label="Valor"
@@ -66,10 +66,11 @@
             </v-text-field>
           </v-col>
           <v-col class="d-flex justify-center align-center">
-            <template v-if="actions.showSaveGroup">
+            <template v-if="transaction.actions.editing">
               <v-btn
                 @click="saveTransaction(transaction)"
-                :disabled="transaction.disableFields"
+                :disabled="transaction.actions.disableFields"
+                :loading="transaction.actions.saving"
                 icon
                 x-small
                 class="ml-1"
@@ -79,7 +80,8 @@
 
               <v-btn
                 @click="cancelTransaction(transaction)"
-                :disabled="transaction.disableFields"
+                :disabled="transaction.actions.disableFields"
+                :loading="transaction.actions.removing"
                 icon
                 x-small
                 class="ml-1"
@@ -90,7 +92,7 @@
             <template v-else>
               <v-btn
                 @click="editTransaction(transaction)"
-                :disabled="actions.disableSaveGroup"
+                :disabled="!transaction.actions.disableFields"
                 icon
                 x-small
               >
@@ -98,7 +100,8 @@
               </v-btn>
               <v-btn
                 @click="removeTransaction(transaction)"
-                :disabled="actions.disableSaveGroup"
+                :disabled="!transaction.actions.disableFields"
+                :loading="transaction.actions.removing"
                 icon
                 x-small
               >
@@ -115,6 +118,7 @@
           <v-btn
             @click="createTransaction"
             :disabled="actions.disableNew"
+            :loading="loading.createTransaction"
             fab
             color="primary"
             big
@@ -149,9 +153,10 @@ export default {
       transactions: [],
       transactionTypes: [],
       actions: {
-        disableNew: false,
-        showSaveGroup: false,
-        disableSaveGroup: false
+        disableNew: false
+      },
+      loading: {
+        createTransaction: false
       },
       validationErrors: {
         date: false,
@@ -182,6 +187,7 @@ export default {
 
   methods: {
     async createTransaction() {
+      this.loading.createTransaction = true
       const data = { referencePeriod: this.referencePeriod }
       const createEmptyTransaction = functions.httpsCallable(
         'createEmptyTransaction'
@@ -194,20 +200,18 @@ export default {
         value: false
       }
       this.actions = {
-        disableNew: true,
-        showSaveGroup: true,
-        disableSaveGroup: false
+        disableNew: true
       }
+      this.loading.createTransaction = false
     },
 
     async saveTransaction(transaction) {
-      this.editingTransaction = transaction
       if (!this.validate()) return
 
-      try {
-        this.editingTransaction.disableFields = true
-        this.editingTransaction.newTransaction = false
+      this.editingTransaction = transaction
+      this.editingTransaction.actions.saving = true
 
+      try {
         const data = {
           referencePeriod: this.referencePeriod,
           transaction: this.editingTransaction
@@ -215,9 +219,7 @@ export default {
         const saveTransaction = functions.httpsCallable('saveTransaction')
         await saveTransaction(data)
         this.actions = {
-          disableNew: false,
-          showSaveGroup: false,
-          disableSaveGroup: false
+          disableNew: false
         }
       } catch (error) {
         this.$emit('onError', 'Ocorreu um erro ao criar a transação')
@@ -225,18 +227,18 @@ export default {
     },
 
     async cancelTransaction(transaction) {
-      if (transaction.newTransaction) {
+      if (transaction.actions.newTransaction) {
         await this.removeTransaction(transaction)
       }
       transaction.disableFields = true
       this.actions = {
-        disableNew: false,
-        showSaveGroup: false,
-        disableSaveGroup: false
+        disableNew: false
       }
     },
 
     async removeTransaction(transaction) {
+      this.editingTransaction = transaction
+      this.editingTransaction.actions.removing = true
       try {
         const data = {
           referencePeriod: this.referencePeriod,
@@ -248,19 +250,16 @@ export default {
         this.$emit('onError', 'Ocorreu um erro ao remover a transação')
       }
       this.actions = {
-        disableNew: false,
-        showSaveGroup: false,
-        disableSaveGroup: false
+        disableNew: false
       }
     },
 
     editTransaction(transaction) {
       this.editingTransaction = transaction
-      this.editingTransaction.disableFields = false
+      this.editingTransaction.actions.disableFields = false
+      this.editingTransaction.actions.editing = true
       this.actions = {
-        disableNew: true,
-        showSaveGroup: true,
-        disableSaveGroup: false
+        disableNew: true
       }
     },
 
