@@ -39,10 +39,10 @@
           </v-col>
           <v-col cols="12" md="3">
             <v-select
-              v-model="transaction.transactionType"
+              v-model="transaction.transactionTypeId"
               :disabled="transaction.disableFields"
               :menu-props="{ top: true, offsetY: true }"
-              :error="validationErrors.transactionType"
+              :error="validationErrors.transactionTypeId"
               :items="transactionTypes"
               item-text="description"
               item-value="id"
@@ -156,7 +156,7 @@ export default {
       validationErrors: {
         date: false,
         description: false,
-        transactionType: false,
+        transactionTypeId: false,
         value: false
       },
       editingTransaction: null,
@@ -190,7 +190,7 @@ export default {
       this.validationErrors = {
         date: false,
         description: false,
-        transactionType: false,
+        transactionTypeId: false,
         value: false
       }
       this.actions = {
@@ -304,8 +304,8 @@ export default {
         this.validationErrors.description = true
         valid = false
       }
-      if (this.editingTransaction.transactionType === '') {
-        this.validationErrors.transactionType = true
+      if (this.editingTransaction.transactionTypeId === '') {
+        this.validationErrors.transactionTypeId = true
         valid = false
       }
       if (this.editingTransaction.value === '') {
