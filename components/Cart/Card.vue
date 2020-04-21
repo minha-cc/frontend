@@ -22,7 +22,7 @@ export default {
   filters: {
     toPercentage(value) {
       if (value !== null) {
-        return `${value}%`
+        return `${Number(value.toFixed(1))}%`
       }
     }
   },

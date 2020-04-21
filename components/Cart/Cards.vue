@@ -87,7 +87,7 @@ export default {
       return {
         income: 0.0,
         outcome: 0.0,
-        essential: { value: 0.0, percentage: 10.0 },
+        essential: { value: 0.0, percentage: 0.0 },
         whises: { value: 0.0, percentage: 0.0 },
         savings: { value: 0.0, percentage: 0.0 }
       }
