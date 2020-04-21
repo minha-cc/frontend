@@ -1,27 +1,30 @@
 <template>
-  <v-row class="ml-2 mr-2">
-    <v-col sm="4" lg="4">
+  <v-row class="ml-1">
+    <v-col sm="5" lg="5">
       <v-row>
-        <Card :value="cart.income" title="Entradas" value-class="income" />
-        <Card :value="cart.outcome" title="Saídas" value-class="outcome" />
+        <Card :value="cart.income" title="ENTRADAS" value-class="income" />
+        <Card :value="cart.outcome" title="SAÍDAS" value-class="outcome" />
       </v-row>
     </v-col>
     <v-spacer />
-    <v-col sm="6" lg="6">
+    <v-col sm="7" lg="7">
       <v-row>
         <Card
-          :value="cart.essential"
-          title="Essenciais (50%)"
+          :value="cart.essential.value"
+          :percentage="cart.essential.percentage"
+          title="ESSENCIAIS (50%)"
           value-class="planning"
         />
         <Card
-          :value="cart.whises"
-          title="Desejos (30%)"
+          :value="cart.whises.value"
+          :percentage="cart.whises.percentage"
+          title="DESEJOS (30%)"
           value-class="planning"
         />
         <Card
-          :value="cart.savings"
-          title="Investimentos (20%)"
+          :value="cart.savings.value"
+          :percentage="cart.savings.percentage"
+          title="INVESTIMENTOS (20%)"
           value-class="planning"
         />
       </v-row>
@@ -84,9 +87,9 @@ export default {
       return {
         income: 0.0,
         outcome: 0.0,
-        essential: 0.0,
-        whises: 0.0,
-        savings: 0.0
+        essential: { value: 0.0, percentage: 10.0 },
+        whises: { value: 0.0, percentage: 0.0 },
+        savings: { value: 0.0, percentage: 0.0 }
       }
     }
   }
