@@ -1,5 +1,5 @@
-import { generateUUID } from '@/plugins/uuid'
-import { firebaseAuth, db } from '@/plugins/firebase'
+import { firebaseAuth } from '@/plugins/firebase'
+import { functions } from '@/plugins/firebase.js'
 
 export const state = () => ({
   currentUser: {}
@@ -28,17 +28,22 @@ export const actions = {
   },
   async signupAsync(context, userInfo) {
     try {
-      const accountId = generateUUID()
-      await firebaseAuth.createUserWithEmailAndPassword(
+      const data = {
+        email: userInfo.email,
+        password: userInfo.password,
+        displayName: userInfo.username
+      }
+      const createUser = functions.httpsCallable('createUser')
+      const result = await createUser(data)
+      await firebaseAuth.signInWithEmailAndPassword(
         userInfo.email,
         userInfo.password
       )
-      const user = await firebaseAuth.currentUser
-      await user.updateProfile({ displayName: userInfo.username })
-      await db
-        .collection('accounts')
-        .doc(user.uid)
-        .set({ accountId })
+      context.commit('setCurrentUser', {
+        email: result.data.email,
+        name: result.data.displayName,
+        uid: result.data.uid
+      })
     } catch (exception) {
       context.commit('setCurrentUser', {})
       throw exception
