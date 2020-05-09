@@ -276,7 +276,9 @@ export default {
           const data = change.doc.data()
           data.id = change.doc.id
           if (change.type === 'added') {
-            this.transactions.unshift(data)
+            if (this.transactions.findIndex((obj) => obj.id === data.id)) {
+              this.transactions.unshift(data)
+            }
           }
           if (change.type === 'removed') {
             this.transactions.splice(
