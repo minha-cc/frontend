@@ -1,7 +1,7 @@
 <script>
 export default {
-  asyncData ({ redirect }) {
-    return redirect(`/${AUTH_PATH}`)
+  asyncData({ redirect }) {
+    return redirect(`/${process.env.AUTH_PATH}`)
   }
 }
 </script>
