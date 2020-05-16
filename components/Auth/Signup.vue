@@ -114,7 +114,7 @@ export default {
           password: this.form.password
         })
 
-        this.$router.push('/dashboard')
+        this.$router.push('/')
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
           this.$emit(
