@@ -4,7 +4,7 @@ export default function({ store, redirect, route }) {
   const signedIn = store.state.auth.currentUser.uid
 
   if (signedIn && route.name === AUTH_PATH) {
-    redirect('/dashboard')
+    redirect('/')
   }
   if (!signedIn && isInternalRoute(route)) {
     redirect(`/${AUTH_PATH}`)
