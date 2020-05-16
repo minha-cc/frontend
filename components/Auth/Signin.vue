@@ -95,7 +95,7 @@ export default {
           password: this.form.password
         })
 
-        this.$router.push('/dashboard')
+        this.$router.push('/')
       } catch (error) {
         this.$emit('onError', 'Usuário ou senha inválidos.')
       }
